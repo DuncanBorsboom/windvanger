@@ -256,18 +256,25 @@
       if (countOut) countOut.textContent = aantal + (aantal === 1 ? " turbine" : " turbines");
 
       const zonnen = is2025()
-        ? ZONUREN_2025.map((z, i) => z * DAGEN[i])
+        ? ZONUREN_2025.map((z) => (z / 12) * 100)
         : MAANDEN.map((_, i) => solarKwh(i, panelen));
       const winden = is2025()
-        ? WINDDAGEN_2025.map((w, i) => w / 100 * DAGEN[i])
+        ? WINDDAGEN_2025.slice()
         : MAANDEN.map((_, i) => windKwh(i, watt) * aantal);
+
+      const lz = document.getElementById("legend-zon");
+      const lw = document.getElementById("legend-wind");
+      if (lz) lz.textContent = is2025() ? "zon (% van het daglicht)" : "zon (panelen)";
+      if (lw) lw.textContent = is2025() ? "wind (% van de dagen)" : "wind (turbine)";
       const max = Math.max(...winden, ...zonnen, 1);
 
       chart.innerHTML = "";
       MAANDEN.forEach((m, i) => {
         const col = document.createElement("div");
         col.className = "calc-bar";
-        col.title = m + (is2025() ? " 2025: " : ": ") + (is2025() ? "zon " + zonnen[i].toFixed(0) + " uur / winddagen " + winden[i].toFixed(0) : "zon " + zonnen[i].toFixed(0) + " kWh / wind " + winden[i].toFixed(0) + " kWh");
+        col.title = is2025()
+          ? m + " 2025: zon " + zonnen[i].toFixed(0) + "% van het daglicht · wind op " + winden[i].toFixed(0) + "% van de dagen"
+          : m + ": zon " + zonnen[i].toFixed(0) + " kWh / wind " + winden[i].toFixed(0) + " kWh";
         const stack = document.createElement("div");
         stack.className = "bar-stack";
         const zs = document.createElement("div");
@@ -294,13 +301,31 @@
       const terugverdient = besparing > 0 ? investering / besparing : 0;
 
       results.innerHTML = "";
-      [
-        [Math.round(totWind) + (is2025() ? " dg" : " kWh"), is2025() ? "winddagen 2025 (≥ 5 m/s)" : "windopbrengst " + aantal + "× turbine per jaar ≈ € " + besparingFmt(besparing)],
-        [Math.round(totZon) + (is2025() ? " u" : " kWh"), is2025() ? "zonuren 2025" : "zonopbrengst " + panelen + " panelen per jaar"],
-        [Math.round(winterWind) + (is2025() ? " dg" : " kWh"), is2025() ? "winddagen winter 2025" : "wind in de winter (nov–feb)"],
-        [Math.round(winterZon) + (is2025() ? " u" : " kWh"), is2025() ? "zonuren winter 2025" : "zon in de winter (nov–feb) — vergelijk!"],
-        [is2025() ? "—" : (terugverdient > 0 ? Math.round(terugverdient) + " jr" : "—"), is2025() ? "schakel terug voor terugverdientijd" : "terugverdientijd ≈ € " + investering.toLocaleString("nl-NL") + " investering"]
-      ].forEach(([v, l]) => {
+      let kaarten;
+      if (is2025()) {
+        const jaarWindP = WINDDAGEN_2025.reduce((a, b) => a + b, 0) / 12;
+        const jaarZonP = ZONUREN_2025.reduce((a, b) => a + b, 0) / 12 / 12 * 100;
+        const zomerWindP = (WINDDAGEN_2025[4] + WINDDAGEN_2025[5] + WINDDAGEN_2025[6] + WINDDAGEN_2025[7]) / 4;
+        const zomerZonP = (ZONUREN_2025[4] + ZONUREN_2025[5] + ZONUREN_2025[6] + ZONUREN_2025[7]) / 4 / 12 * 100;
+        const winterWindP = (WINDDAGEN_2025[0] + WINDDAGEN_2025[1] + WINDDAGEN_2025[10] + WINDDAGEN_2025[11]) / 4;
+        const winterZonP = (ZONUREN_2025[0] + ZONUREN_2025[1] + ZONUREN_2025[10] + ZONUREN_2025[11]) / 4 / 12 * 100;
+        kaarten = [
+          [Math.round(jaarWindP) + "% · " + Math.round(jaarZonP) + "%", "heel jaar 2025: wind beschikbaar vs zonneschijn"],
+          [Math.round(zomerWindP) + "% · " + Math.round(zomerZonP) + "%", "zomer (mei–aug): hier wint zon net"],
+          [Math.round(winterWindP) + "% · " + Math.round(winterZonP) + "%", "winter (nov–feb): wind wint 5× van zon"],
+          ["24/7", "wind waait ook 's nachts door — zon alleen bij daglicht"],
+          ["—", "schakel terug voor jouw situatie en terugverdientijd"]
+        ];
+      } else {
+        kaarten = [
+          [Math.round(totWind) + " kWh", "windopbrengst " + aantal + "× turbine per jaar ≈ € " + besparingFmt(besparing)],
+          [Math.round(totZon) + " kWh", "zonopbrengst " + panelen + " panelen per jaar"],
+          [Math.round(winterWind) + " kWh", "wind in de winter (nov–feb)"],
+          [Math.round(winterZon) + " kWh", "zon in de winter (nov–feb) — vergelijk!"],
+          [terugverdient > 0 ? Math.round(terugverdient) + " jr" : "—", "terugverdientijd ≈ € " + investering.toLocaleString("nl-NL") + " investering"]
+        ];
+      }
+      kaarten.forEach(([v, l]) => {
         const stat = document.createElement("div");
         stat.className = "calc-stat";
         const strong = document.createElement("strong");

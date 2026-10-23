@@ -131,7 +131,7 @@
           <button class="calc-mode active" data-mode="setup">Jouw situatie</button>
           <button class="calc-mode" data-mode="2025">NL 2025 — gemeten zon & wind</button>
         </div>
-        <div class="calc-legend mono"><span><span class="dot dot-solar"></span>zon (panelen)</span><span><span class="dot dot-wind"></span>wind (turbine)</span></div>
+        <div class="calc-legend mono"><span><span class="dot dot-solar"></span><span id="legend-zon">zon (panelen)</span></span><span><span class="dot dot-wind"></span><span id="legend-wind">wind (turbine)</span></span></div>
         <div class="calc-chart" id="calc-chart" role="img" aria-label="Maandgrafiek zon versus wind opbrengst"></div>
         <div class="calc-results mono" id="calc-results"></div>
         <p class="calc-note mono">
@@ -280,6 +280,36 @@
           <p>De eilandmodus van de omvormer neemt binnen 20 milliseconden over. Je merkt niets — behalve dat je buren donker zitten.</p>
         </details>
       </div>
+    </section>
+
+    <section class="regels" id="regels">
+      <div class="section-head">
+        <h2>Regels per gemeente</h2>
+        <p>Kleine windturbines vallen in de meeste gemeenten onder het bouwvergunningsvrije traject — maar de details verschillen. Hier het huidige beeld.</p>
+      </div>
+      <div class="regels-grid">
+        <article class="r-card">
+          <span class="r-num mono">01</span>
+          <h3>Gevel &amp; dak (tot 2 m)</h3>
+          <p>In vrijwel alle gemeenten vergunningsvrij, mits de turbine niet boven de daklijn uitkomt. Bekijk altijd even de plaatselijke welstandsnota.</p>
+        </article>
+        <article class="r-card">
+          <span class="r-num mono">02</span>
+          <h3>Mast in de tuin (tot 4–5 m)</h3>
+          <p>Vaak vergunningsvrij onder het "beperkt bouwvergunningvrij"-traject, maar sommige gemeenten hanteren een max van 3 m of een afstandseis tot de erfgrens. Wij regelen de aanvraag met je mee.</p>
+        </article>
+        <article class="r-card">
+          <span class="r-num mono">03</span>
+          <h3>Geluid &amp; veiligheid</h3>
+          <p>Onze turbines blijven onder de 40 dB — ruim binnen elke gemeentelijke norm. Vangarmen en rem-systemen voorkomen losliggende onderdelen, ook bij storm.</p>
+        </article>
+        <article class="r-card r-card-accent">
+          <span class="r-num mono">04</span>
+          <h3>Twijfel over jouw gemeente?</h3>
+          <p>Stuur ons je postcode — wij checken de regels van jouw gemeente gratis en laten je binnen 2 werkdagen weten wat er kan en niet kan.</p>
+        </article>
+      </div>
+      <p class="regels-note mono">Regels kunnen per gemeente en per moment verschillen. Deze pagina geeft het algemene beeld van 2025 — voor de actuele situatie in jouw gemeente doen we een gratis check.</p>
     </section>
 
     <section class="newsletter">
