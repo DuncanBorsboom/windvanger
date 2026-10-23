@@ -1,20 +1,5 @@
 /* WINDVANGER — eigen stijl: stormblauw + bliksemgeel */
 :root {
-  --ink: #0b1220;
-  --ink-2: #101a2e;
-  --panel: #16223a;
-  --line: #27395c;
-  --text: #e8eef7;
-  --muted: #93a3bd;
-  --accent: #ffd447;
-  --accent-2: #38d9c0;
-  --radius: 18px;
-  --font-head: "Sora", system-ui, sans-serif;
-  --font-mono: "Space Mono", monospace;
-}
-
-/* Licht thema: zelfde kleuren, lichte waarden */
-html[data-theme="light"] {
   --ink: #f4f7fb;
   --ink-2: #ffffff;
   --panel: #e9eef6;
@@ -23,6 +8,9 @@ html[data-theme="light"] {
   --muted: #5a6b85;
   --accent: #f5b800;
   --accent-2: #0aa08c;
+  --radius: 18px;
+  --font-head: "Sora", system-ui, sans-serif;
+  --font-mono: "Space Mono", monospace;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -43,7 +31,7 @@ body {
   position: sticky; top: 0; z-index: 40;
   display: flex; align-items: center; gap: 2rem;
   padding: 1rem clamp(1rem, 4vw, 3rem);
-  background: rgba(11, 18, 32, .85);
+  background: rgba(255, 255, 255, .85);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
 }
@@ -70,13 +58,6 @@ body {
   cursor: pointer;
 }
 .cart-btn:hover { border-color: var(--accent); }
-.theme-btn {
-  background: var(--panel); color: var(--text);
-  border: 1px solid var(--line); border-radius: 999px;
-  width: 38px; height: 38px; font-size: 1rem;
-  cursor: pointer;
-}
-.theme-btn:hover { border-color: var(--accent); }
 .lang-btn {
   display: flex; align-items: center;
   background: var(--panel); color: var(--accent-2);
@@ -135,7 +116,7 @@ body {
 .pole {
   position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
   width: 8px; height: 55%;
-  background: linear-gradient(var(--line), #3a5484);
+  background: linear-gradient(var(--line), #a8bdd8);
   border-radius: 4px;
 }
 .rotor {
@@ -207,7 +188,7 @@ body {
 .product:hover { transform: translateY(-4px); border-color: var(--accent); }
 .product-art {
   position: relative; height: 190px;
-  background: radial-gradient(circle at 60% 20%, #1d2c4a, var(--ink-2));
+  background: radial-gradient(circle at 60% 20%, #dce7f4, var(--ink-2));
   display: flex; align-items: flex-end; justify-content: center;
 }
 .product-art .turbine { width: 110px; height: 150px; margin-bottom: 14px; }
@@ -238,7 +219,7 @@ body {
 .b-card h3 { margin-bottom: .5rem; font-size: 1.1rem; }
 .b-card p { color: var(--muted); font-size: .92rem; }
 .b-num { color: var(--accent); font-size: .8rem; letter-spacing: .15em; display: block; margin-bottom: .8rem; }
-.b-card-accent { background: linear-gradient(160deg, #2b2413, var(--ink-2)); border-color: var(--accent); }
+.b-card-accent { background: linear-gradient(160deg, #fff6d8, var(--ink-2)); border-color: var(--accent); }
 .b-card-accent h3 { color: var(--accent); }
 
 /* Grid-schema (SVG) */
@@ -410,7 +391,7 @@ details[open] { border-color: var(--accent); }
 /* ---------- Cart ---------- */
 .cart-overlay, .modal-overlay {
   position: fixed; inset: 0; z-index: 50;
-  background: rgba(5, 9, 17, .6);
+  background: rgba(20, 33, 58, .45);
   backdrop-filter: blur(3px);
 }
 .cart-overlay[hidden], .modal-overlay[hidden] { display: none; }
@@ -467,7 +448,7 @@ details[open] { border-color: var(--accent); }
 .modal-body h3 { font-size: 1.5rem; margin-bottom: .2rem; }
 .m-tag { color: var(--accent-2); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 1rem; display: block; }
 .m-art { height: 170px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 1.4rem;
-  background: radial-gradient(circle at 60% 20%, #1d2c4a, var(--ink-2)); border-radius: 14px; }
+  background: radial-gradient(circle at 60% 20%, #dce7f4, var(--ink-2)); border-radius: 14px; }
 .m-art .turbine { width: 120px; height: 140px; }
 .m-desc { color: var(--muted); margin-bottom: 1.2rem; }
 .m-specs { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 1.4rem; }

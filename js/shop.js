@@ -317,18 +317,5 @@
     nlForm.reset();
   });
 
-  /* ---------- Thema-toggle ---------- */
-  const themeBtn = document.getElementById("theme-toggle");
-  if (themeBtn) {
-    const saved = localStorage.getItem("windvanger-theme");
-    if (saved) document.documentElement.dataset.theme = saved;
-    themeBtn.addEventListener("click", () => {
-      const root = document.documentElement;
-      const next = root.dataset.theme === "light" ? "" : "light";
-      if (next) root.dataset.theme = next; else delete root.dataset.theme;
-      localStorage.setItem("windvanger-theme", next);
-    });
-  }
-
   renderGrid();
 })();
