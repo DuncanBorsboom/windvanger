@@ -335,6 +335,13 @@ details[open] { border-color: var(--accent); }
 }
 .calc-stat strong { font-size: 1.2rem; color: var(--accent); }
 .calc-stat span { font-size: .72rem; color: var(--muted); font-family: var(--font-head); }
+.calc-note {
+  font-size: .72rem; color: var(--muted); line-height: 1.6;
+  margin: 0; padding: .8rem 1rem;
+  border-left: 3px solid var(--accent-2);
+  background: var(--panel);
+  border-radius: 8px;
+}
 
 /* Newsletter */
 .newsletter { text-align: center; }
