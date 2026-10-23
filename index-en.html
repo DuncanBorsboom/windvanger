@@ -56,7 +56,7 @@
           <a class="btn btn-ghost" href="#batterij">How the battery pairing works</a>
         </div>
         <ul class="hero-stats mono">
-          <li><strong>38 dB</strong><span>whisper-quiet</span></li>
+          <li><strong>38 dB</strong><span>whisper-quiet — quieter than a heat pump</span></li>
           <li><strong>4 m/s</strong><span>starts in a light breeze</span></li>
           <li><strong>24/7</strong><span>generation, even at night</span></li>
         </ul>
@@ -178,11 +178,11 @@
       </div>
       <div class="schema-wrap" role="img" aria-label="Diagram: wind turbine and solar panels charge the home battery via the inverter, the house runs on the battery, the grid is backup only via island mode">
         <svg viewBox="0 0 820 380" class="schema" xmlns="http://www.w3.org/2000/svg">
-          <path id="p-wind" class="link" d="M 130 100 H 250" />
-          <path id="p-zon" class="link" d="M 130 250 H 250" />
-          <path id="p-inv" class="link link-strong" d="M 330 175 V 230 H 430" />
+          <path id="p-wind" class="link" d="M 130 100 H 205 V 175 H 250" />
+          <path id="p-zon" class="link" d="M 130 250 H 205 V 175 H 250" />
+          <path id="p-inv" class="link link-strong" d="M 330 175 H 380 V 230 H 430" />
           <path id="p-bat" class="link link-strong" d="M 530 230 H 630" />
-          <path id="p-grid" class="link link-backup" d="M 430 310 H 630" />
+          <path id="p-grid" class="link link-backup" d="M 430 310 H 590 V 230 H 630" />
 
           <circle r="5" class="dot dot-wind"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath href="#p-wind"/></animateMotion></circle>
           <circle r="5" class="dot dot-zon"><animateMotion dur="2.8s" repeatCount="indefinite" begin="0.4s"><mpath href="#p-zon"/></animateMotion></circle>
@@ -249,7 +249,14 @@
       <div class="faq-list">
         <details>
           <summary>Aren't vertical turbines noisy?</summary>
-          <p>No. Our Savonius and helix rotors spin slowly (max ~300 rpm) and measure around <strong>38 dB</strong> at 2 metres — comparable to a quiet bedroom.</p>
+          <p>No. Our Savonius and helix rotors spin slowly (max ~300 rpm) and measure around <strong>38 dB</strong> at 2 metres. For comparison: a library is ≈ 40 dB, an average heat pump 40–50 dB, a fridge 35–45 dB and a quiet house at night ≈ 30 dB. Our turbine sits at the same level as your fridge — quieter than the heat pump most people already have on their wall or in their garden.</p>
+          <div class="db-vergelijk mono">
+            <span class="db-row"><span class="db-label">wind turbine</span><span class="db-bar" style="--w: 38%"></span><span class="db-val">38 dB</span></span>
+            <span class="db-row"><span class="db-label">fridge</span><span class="db-bar" style="--w: 42%"></span><span class="db-val">35–45 dB</span></span>
+            <span class="db-row"><span class="db-label">library</span><span class="db-bar" style="--w: 40%"></span><span class="db-val">40 dB</span></span>
+            <span class="db-row"><span class="db-label">heat pump</span><span class="db-bar db-bar-loud" style="--w: 55%"></span><span class="db-val">40–50 dB</span></span>
+            <span class="db-row"><span class="db-label">conversation</span><span class="db-bar db-bar-loud" style="--w: 65%"></span><span class="db-val">60 dB</span></span>
+          </div>
         </details>
         <details>
           <summary>What about net metering? Do I lose money feeding power back?</summary>

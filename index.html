@@ -56,7 +56,7 @@
           <a class="btn btn-ghost" href="#batterij">Hoe de batterij-koppeling werkt</a>
         </div>
         <ul class="hero-stats mono">
-          <li><strong>38 dB</strong><span>fluisterstil</span></li>
+          <li><strong>38 dB</strong><span>fluisterstil — stiller dan een warmtepomp</span></li>
           <li><strong>4 m/s</strong><span>start bij licht briesje</span></li>
           <li><strong>24/7</strong><span>opwek, ook 's nachts</span></li>
         </ul>
@@ -179,11 +179,11 @@
       <div class="schema-wrap" role="img" aria-label="Schema: windturbine en zonnepanelen laden via de omvormer de thuisbatterij, het huis loopt op de batterij, het grid is alleen back-up via de eilandmodus">
         <svg viewBox="0 0 820 380" class="schema" xmlns="http://www.w3.org/2000/svg">
           <!-- Verbindingslijnen -->
-          <path id="p-wind" class="link" d="M 130 100 H 250" />
-          <path id="p-zon" class="link" d="M 130 250 H 250" />
-          <path id="p-inv" class="link link-strong" d="M 330 175 V 230 H 430" />
+          <path id="p-wind" class="link" d="M 130 100 H 205 V 175 H 250" />
+          <path id="p-zon" class="link" d="M 130 250 H 205 V 175 H 250" />
+          <path id="p-inv" class="link link-strong" d="M 330 175 H 380 V 230 H 430" />
           <path id="p-bat" class="link link-strong" d="M 530 230 H 630" />
-          <path id="p-grid" class="link link-backup" d="M 430 310 H 630" />
+          <path id="p-grid" class="link link-backup" d="M 430 310 H 590 V 230 H 630" />
 
           <!-- Stroom-pjes -->
           <circle r="5" class="dot dot-wind"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath href="#p-wind"/></animateMotion></circle>
@@ -257,7 +257,14 @@
       <div class="faq-list">
         <details>
           <summary>Maken verticale turbines niet veel geluid?</summary>
-          <p>Nee. Onze Savonius- en helix-rotors draaien langzaam (max ~300 rpm) en komen op 2 meter afstand rond de <strong>38 dB</strong> — vergelijkbaar met een stille slaapkamer.</p>
+          <p>Nee. Onze Savonius- en helix-rotors draaien langzaam (max ~300 rpm) en komen op 2 meter afstand rond de <strong>38 dB</strong>. Ter vergelijking: een bibliotheek is ≈ 40 dB, een gemiddelde warmtepomp 40–50 dB, een koelkast 35–45 dB en een stil huis 's nachts ≈ 30 dB. Onze turbine hoort dus bij hetzelfde geluidsniveau als je koelkast — en stiller dan de warmtepomp die de meeste mensen al in de tuin of aan de muur hebben hangen.</p>
+          <div class="db-vergelijk mono">
+            <span class="db-row"><span class="db-label">windturbine</span><span class="db-bar" style="--w: 38%"></span><span class="db-val">38 dB</span></span>
+            <span class="db-row"><span class="db-label">koelkast</span><span class="db-bar" style="--w: 42%"></span><span class="db-val">35–45 dB</span></span>
+            <span class="db-row"><span class="db-label">bibliotheek</span><span class="db-bar" style="--w: 40%"></span><span class="db-val">40 dB</span></span>
+            <span class="db-row"><span class="db-label">warmtepomp</span><span class="db-bar db-bar-loud" style="--w: 55%"></span><span class="db-val">40–50 dB</span></span>
+            <span class="db-row"><span class="db-label">pratend gesprek</span><span class="db-bar db-bar-loud" style="--w: 65%"></span><span class="db-val">60 dB</span></span>
+          </div>
         </details>
         <details>
           <summary>Hoe zit het met saldering? Verlies ik geld als ik stroom teruglever?</summary>
