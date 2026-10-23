@@ -241,19 +241,62 @@ body {
 .b-card-accent { background: linear-gradient(160deg, #2b2413, var(--ink-2)); border-color: var(--accent); }
 .b-card-accent h3 { color: var(--accent); }
 
-/* Grid-viz */
-.grid-viz {
-  display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: center;
-  margin-bottom: 1.6rem;
+/* Grid-schema (SVG) */
+.schema-wrap {
+  max-width: 760px; margin: 0 auto 1.6rem;
 }
-.gv-node {
-  border: 1px solid var(--line); border-radius: 999px;
-  background: var(--panel); padding: .7rem 1.3rem; font-size: .85rem;
+.schema {
+  width: 100%; height: auto; display: block;
+  background: var(--ink-2);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1rem;
 }
-.gv-node::after { content: "→"; margin-left: .8rem; color: var(--muted); }
-.gv-node:last-child::after { content: ""; }
-.gv-core { border-color: var(--accent); box-shadow: 0 0 24px rgba(255, 212, 71, .2); font-weight: 700; }
-.gv-muted { opacity: .55; }
+.schema .node rect {
+  fill: var(--panel); stroke: var(--line); stroke-width: 1.5;
+}
+.schema .node-core rect {
+  stroke: var(--accent);
+  filter: drop-shadow(0 0 12px rgba(255, 212, 71, .25));
+}
+.schema .node-backup rect { stroke-dasharray: 6 4; opacity: .8; }
+.schema .icon { font-size: 26px; text-anchor: middle; }
+.schema .label {
+  font-family: var(--font-mono); font-size: 12px;
+  fill: var(--text); text-anchor: middle;
+}
+.schema .label-sm {
+  font-family: var(--font-mono); font-size: 11px;
+  fill: var(--accent-2); text-anchor: middle;
+}
+.schema .link {
+  stroke: var(--line); stroke-width: 2; fill: none;
+}
+.schema .link-strong { stroke: var(--muted); }
+.schema .link-backup {
+  stroke: var(--muted); stroke-width: 2;
+  stroke-dasharray: 6 5; opacity: .6;
+}
+.schema .dot { fill: var(--accent); }
+.schema .dot-wind { fill: var(--accent); }
+.schema .dot-zon { fill: #7aa2ff; }
+.schema .dot-bat { fill: var(--accent); }
+.schema .dot-grid { fill: var(--muted); }
+.schema .switch circle {
+  fill: var(--ink-2); stroke: var(--accent-2); stroke-width: 2;
+}
+.schema-legend {
+  display: flex; gap: 1.6rem; justify-content: center;
+  font-size: .72rem; color: var(--muted); margin-top: .8rem;
+}
+.schema-legend .dot {
+  display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+  margin-right: .4rem; vertical-align: middle;
+}
+.schema-legend .dash {
+  display: inline-block; width: 22px; height: 0;
+  border-top: 2px dashed var(--muted); opacity: .6;
+  margin-right: .4rem; vertical-align: middle;
+}
 .grid-note { text-align: center; color: var(--muted); max-width: 42em; margin: 0 auto; }
 .grid-note strong { color: var(--text); }
 

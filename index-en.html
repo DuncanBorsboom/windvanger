@@ -173,13 +173,66 @@
         <h2>Not just solar. Not just the grid.</h2>
         <p>Solar, wind and storage together make your home truly self-sufficient.</p>
       </div>
-      <div class="grid-viz mono" role="img" aria-label="Diagram: wind and solar charge the battery, the house runs on the battery, grid is backup">
-        <div class="gv-node"><span>🌬️ Wind</span></div>
-        <div class="gv-node"><span>☀️ Solar</span></div>
-        <div class="gv-node gv-core"><span>🔋 Battery</span></div>
-        <div class="gv-node"><span>🏠 Home</span></div>
-        <div class="gv-node gv-muted"><span>⚡ Grid (backup)</span></div>
+      <div class="schema-wrap" role="img" aria-label="Diagram: wind turbine and solar panels charge the home battery via the inverter, the house runs on the battery, the grid is backup only via island mode">
+        <svg viewBox="0 0 820 380" class="schema" xmlns="http://www.w3.org/2000/svg">
+          <path id="p-wind" class="link" d="M 130 100 H 250" />
+          <path id="p-zon" class="link" d="M 130 250 H 250" />
+          <path id="p-inv" class="link link-strong" d="M 330 175 V 230 H 430" />
+          <path id="p-bat" class="link link-strong" d="M 530 230 H 630" />
+          <path id="p-grid" class="link link-backup" d="M 430 310 H 630" />
+
+          <circle r="5" class="dot dot-wind"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath href="#p-wind"/></animateMotion></circle>
+          <circle r="5" class="dot dot-zon"><animateMotion dur="2.8s" repeatCount="indefinite" begin="0.4s"><mpath href="#p-zon"/></animateMotion></circle>
+          <circle r="5" class="dot dot-bat"><animateMotion dur="2s" repeatCount="indefinite"><mpath href="#p-inv"/></animateMotion></circle>
+          <circle r="5" class="dot dot-bat"><animateMotion dur="2s" repeatCount="indefinite" begin="1s"><mpath href="#p-bat"/></animateMotion></circle>
+          <circle r="4" class="dot dot-grid"><animateMotion dur="4s" repeatCount="indefinite"><mpath href="#p-grid"/></animateMotion></circle>
+
+          <g class="node">
+            <rect x="20" y="55" width="110" height="90" rx="14" />
+            <text x="75" y="90" class="icon">🌬️</text>
+            <text x="75" y="125" class="label">wind turbine</text>
+          </g>
+          <g class="node">
+            <rect x="20" y="205" width="110" height="90" rx="14" />
+            <text x="75" y="240" class="icon">☀️</text>
+            <text x="75" y="275" class="label">solar panels</text>
+          </g>
+
+          <g class="node">
+            <rect x="250" y="130" width="80" height="90" rx="14" />
+            <text x="290" y="160" class="icon">⚡</text>
+            <text x="290" y="195" class="label">inverter</text>
+          </g>
+
+          <g class="node node-core">
+            <rect x="430" y="185" width="100" height="90" rx="14" />
+            <text x="480" y="215" class="icon">🔋</text>
+            <text x="480" y="250" class="label">home battery</text>
+          </g>
+
+          <g class="node">
+            <rect x="630" y="185" width="120" height="90" rx="14" />
+            <text x="690" y="215" class="icon">🏠</text>
+            <text x="690" y="250" class="label">your home</text>
+          </g>
+
+          <g class="node node-backup">
+            <rect x="250" y="265" width="180" height="90" rx="14" />
+            <text x="340" y="300" class="icon">🔌</text>
+            <text x="340" y="335" class="label">grid · backup</text>
+          </g>
+
+          <g class="switch">
+            <circle cx="430" cy="310" r="10" />
+            <text x="430" y="355" class="label-sm">island mode → during an outage the battery takes over within 20 ms</text>
+          </g>
+        </svg>
+        <p class="schema-legend mono">
+          <span><span class="dot dot-bat"></span> energy flow</span>
+          <span><span class="dash"></span> only during grid outage (backup)</span>
+        </p>
       </div>
+
       <p class="grid-note">
         Wind in winter, sun in summer, battery as the bridge.
         <strong>The grid becomes your backup, not your lifeline.</strong>
