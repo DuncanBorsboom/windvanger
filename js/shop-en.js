@@ -251,16 +251,19 @@
         const col = document.createElement("div");
         col.className = "calc-bar";
         col.title = m + ": solar " + zonnen[i].toFixed(0) + " kWh / wind " + winden[i].toFixed(0) + " kWh";
+        const stack = document.createElement("div");
+        stack.className = "bar-stack";
         const zs = document.createElement("div");
         zs.className = "bar-solar";
-        zs.style.height = Math.max(zonnen[i] / max * 100, 1) + "%";
+        zs.style.height = Math.max(zonnen[i] / max * 100, 1.5) + "%";
         const ws = document.createElement("div");
         ws.className = "bar-wind";
-        ws.style.height = Math.max(winden[i] / max * 100, 1) + "%";
+        ws.style.height = Math.max(winden[i] / max * 100, 1.5) + "%";
         const lbl = document.createElement("div");
         lbl.className = "bar-month";
         lbl.textContent = m;
-        col.append(zs, ws, lbl);
+        stack.append(ws, zs);
+        col.append(stack, lbl);
         chart.appendChild(col);
       });
 

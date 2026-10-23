@@ -25,6 +25,7 @@
     </a>
     <nav class="main-nav" aria-label="Main menu">
       <a href="#shop">Turbines</a>
+      <a href="#calculator">Calculator</a>
       <a href="#batterij">Home battery</a>
       <a href="#grid">Grid-independent</a>
       <a href="#faq">FAQ</a>
@@ -77,6 +78,39 @@
         <div class="wind-lines">
           <span></span><span></span><span></span><span></span>
         </div>
+      </div>
+    </section>
+
+    <section class="calc" id="calculator">
+      <div class="section-head">
+        <h2>What does wind deliver vs. solar?</h2>
+        <p>Enter your situation and see month by month how many kWh a turbine delivers alongside your solar panels — based on average Dutch sun and wind data.</p>
+      </div>
+      <div class="calc-panel">
+        <div class="calc-inputs">
+          <label class="calc-field">
+            <span>Solar panels</span>
+            <input type="range" id="calc-solar" min="0" max="20" step="1" value="8">
+            <output class="mono" id="calc-solar-out">8 panels (± 2.9 kWp)</output>
+          </label>
+          <label class="calc-field">
+            <span>Turbine</span>
+            <select id="calc-turbine">
+              <option value="150">Havik Mini — 150 W</option>
+              <option value="300" selected>Bries — 300 W</option>
+              <option value="600">Zephyr — 600 W</option>
+              <option value="1500">Stormvogel — 1.500 W</option>
+            </select>
+          </label>
+          <label class="calc-field">
+            <span>Electricity price</span>
+            <input type="number" id="calc-price" min="0.10" max="1.00" step="0.01" value="0.33">
+            <output class="mono">€/kWh</output>
+          </label>
+        </div>
+        <div class="calc-legend mono"><span><span class="dot dot-solar"></span>solar (panels)</span><span><span class="dot dot-wind"></span>wind (turbine)</span></div>
+        <div class="calc-chart" id="calc-chart" role="img" aria-label="Maandgrafiek zon versus wind opbrengst"></div>
+        <div class="calc-results mono" id="calc-results"></div>
       </div>
     </section>
 
@@ -167,38 +201,6 @@
           <summary>What happens during a power outage?</summary>
           <p>The inverter's island mode takes over within 20 milliseconds. You won't notice — except that your neighbours are sitting in the dark.</p>
         </details>
-      </div>
-    </section>
-
-    <section class="calc" id="calculator">
-      <div class="section-head">
-        <h2>What does wind deliver vs. solar?</h2>
-        <p>Enter your situation and see month by month how many kWh a turbine delivers alongside your solar panels — based on average Dutch sun and wind data.</p>
-      </div>
-      <div class="calc-panel">
-        <div class="calc-inputs">
-          <label class="calc-field">
-            <span>Solar panels</span>
-            <input type="range" id="calc-solar" min="0" max="20" step="1" value="8">
-            <output class="mono" id="calc-solar-out">8 panels (± 2.9 kWp)</output>
-          </label>
-          <label class="calc-field">
-            <span>Turbine</span>
-            <select id="calc-turbine">
-              <option value="150">Havik Mini — 150 W</option>
-              <option value="300" selected>Bries — 300 W</option>
-              <option value="600">Zephyr — 600 W</option>
-              <option value="1500">Stormvogel — 1.500 W</option>
-            </select>
-          </label>
-          <label class="calc-field">
-            <span>Electricity price</span>
-            <input type="number" id="calc-price" min="0.10" max="1.00" step="0.01" value="0.33">
-            <output class="mono">€/kWh</output>
-          </label>
-        </div>
-        <div class="calc-chart" id="calc-chart" role="img" aria-label="Maandgrafiek zon versus wind opbrengst"></div>
-        <div class="calc-results mono" id="calc-results"></div>
       </div>
     </section>
 
