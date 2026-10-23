@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Windvanger — Stille windturbines voor thuis</title>
+  <meta name="description" content="Verticale windturbines voor gevel, dak en tuin. Stil, veilig en gekoppeld aan je thuisbatterij. Check gratis hoeveel wind jouw adres krijgt.">
+  <meta name="theme-color" content="#0f1b24">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Windvanger — wind werkt door als de zon slaapt">
+  <meta property="og:description" content="Stille verticale windturbines + thuisbatterij. Check live hoeveel wind jouw adres krijgt.">
+  <meta property="og:locale" content="nl_NL">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f1b24'/%3E%3Cpath d='M16 5v22M10 8c4 3 8 5 12 8M10 16c4 3 8 5 12 8' stroke='%2346d9c8' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Naar inhoud</a>
+
+  <div class="announce" role="note">
+    <span class="announce-dot" aria-hidden="true"></span>
+    <span>De salderingsregeling stopt op 1 januari 2027 — <strong id="countdown-short">nog … dagen</strong>. Eigen opslag wordt de nieuwe norm.</span>
+    <a href="#saldering">Wat betekent dat?</a>
+  </div>
+
+  <header class="site-header">
+    <a class="logo" href="#top" aria-label="Windvanger, naar boven">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="currentColor"/><path d="M16 5v22M10 8c4 3 8 5 12 8M10 16c4 3 8 5 12 8" stroke="var(--wind)" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>
+      Windvanger
+    </a>
+    <nav class="nav" aria-label="Hoofdmenu">
+      <a href="#kiezer">Keuzehulp</a>
+      <a href="#turbines">Turbines</a>
+      <a href="#windcheck">Windcheck</a>
+      <a href="#batterij">Met batterij</a>
+      <a href="#faq">Vragen</a>
+    </nav>
+    <button class="cart-btn" id="cart-open" aria-haspopup="dialog" aria-controls="cart">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12L6 6z"/><path d="M6 6L5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+      <span class="sr-only">Winkelwagen,</span>
+      <span class="cart-count" id="cart-count" aria-live="polite">0</span>
+    </button>
+  </header>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero" id="top">
+      <div class="hero-copy">
+        <p class="eyebrow">Thuiswind · stil · gekoppeld aan je batterij</p>
+        <h1>Wind werkt door <em>als de zon slaapt.</em></h1>
+        <p class="lead">Zonnepanelen leveren in december een tiende van juni. Onze verticale turbines draaien juist dan het hardst — 's avonds, 's nachts, de hele winter. Stil genoeg voor naast je slaapkamer.</p>
+
+        <form class="postcode-form" id="hero-check" autocomplete="on">
+          <label for="hero-postcode">Hoeveel wind krijgt jouw adres?</label>
+          <div class="input-row">
+            <input id="hero-postcode" name="postal-code" autocomplete="postal-code" inputmode="text" placeholder="Postcode, bijv. 1781 AB" required pattern="\s*[1-9][0-9]{3}\s?[A-Za-z]{2}\s*">
+            <button class="btn btn-primary" type="submit">Check gratis</button>
+          </div>
+          <p class="hint">Met gemeten wind- en zondata van 2025 voor jouw locatie. Geen e-mail nodig.</p>
+        </form>
+
+        <ul class="trust" aria-label="Zekerheden">
+          <li><strong>10 jaar</strong> garantie</li>
+          <li><strong>30 dagen</strong> bedenktijd</li>
+          <li><strong>3 × </strong> betalen met in3</li>
+          <li><strong>Installatie</strong> in heel NL</li>
+        </ul>
+      </div>
+
+      <div class="hero-visual" aria-label="Live windmeting">
+        <div class="hero-turbine" id="hero-turbine"></div>
+        <div class="live-card" id="live-card">
+          <div class="live-head"><span class="pulse" aria-hidden="true"></span> Nu live</div>
+          <div class="live-row"><span id="live-wind" class="live-big">– m/s</span><span id="live-place" class="live-place">De Bilt</span></div>
+          <div class="live-sub">Een <strong>Zephyr</strong> levert nu ≈ <strong id="live-watt">–</strong></div>
+          <div class="live-meter" aria-hidden="true"><span id="live-meter"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Kerncijfers">
+      <div><b>36 dB</b><span>stiller dan een koelkast</span></div>
+      <div><b>3 m/s</b><span>start bij een zacht briesje</span></div>
+      <div><b>tot 5×</b><span>meer winteropwek per kW dan zon</span></div>
+      <div><b>&lt; 20 ms</b><span>overschakeling bij stroomuitval</span></div>
+    </section>
+
+    <!-- KEUZEHULP -->
+    <section class="section finder" id="kiezer" aria-labelledby="finder-title">
+      <div class="section-head">
+        <p class="eyebrow">Keuzehulp · 30 seconden</p>
+        <h2 id="finder-title">Welke turbine past bij jouw huis?</h2>
+      </div>
+      <form class="finder-card" id="finder">
+        <fieldset data-step="1">
+          <legend>1. Waar woon je?</legend>
+          <div class="choices">
+            <label><input type="radio" name="home" value="appartement" required><span>🏢 Appartement</span></label>
+            <label><input type="radio" name="home" value="rijtjeshuis"><span>🏘️ Rijtjes- of hoekhuis</span></label>
+            <label><input type="radio" name="home" value="vrijstaand"><span>🏡 Vrijstaand met tuin</span></label>
+          </div>
+        </fieldset>
+        <fieldset data-step="2">
+          <legend>2. Wat wil je vooral?</legend>
+          <div class="choices">
+            <label><input type="radio" name="goal" value="klein" required><span>🌱 Klein beginnen</span></label>
+            <label><input type="radio" name="goal" value="besparen"><span>💶 Maximaal besparen</span></label>
+            <label><input type="radio" name="goal" value="onafhankelijk"><span>🔋 Stroom bij uitval</span></label>
+          </div>
+        </fieldset>
+        <fieldset data-step="3">
+          <legend>3. Heb je al een thuisbatterij?</legend>
+          <div class="choices">
+            <label><input type="radio" name="battery" value="ja" required><span>Ja</span></label>
+            <label><input type="radio" name="battery" value="nee"><span>Nee</span></label>
+          </div>
+        </fieldset>
+        <div class="finder-result" id="finder-result" aria-live="polite" hidden></div>
+      </form>
+    </section>
+
+    <!-- PRODUCTEN -->
+    <section class="section" id="turbines" aria-labelledby="products-title">
+      <div class="section-head">
+        <p class="eyebrow">Het assortiment</p>
+        <h2 id="products-title">Elke turbine is plug &amp; play met je thuisbatterij</h2>
+        <p>Omvormer en koppelkit altijd inbegrepen. Opbrengsten berekend bij gemiddeld 5 m/s op 10 m hoogte (kustprovincie).</p>
+      </div>
+      <div class="filters" role="toolbar" aria-label="Filter op type" id="filters"></div>
+      <div class="grid" id="product-grid"></div>
+    </section>
+
+    <!-- WINDCHECK -->
+    <section class="section calc" id="windcheck" aria-labelledby="calc-title">
+      <div class="section-head">
+        <p class="eyebrow">Windcheck · echte data</p>
+        <h2 id="calc-title">Jouw adres, maand voor maand: wind naast zon</h2>
+        <p>We halen de gemeten wind en zoninstraling van 2025 op voor jouw postcode en rekenen met de vermogenscurve van de turbine.</p>
+      </div>
+      <div class="calc-wrap">
+        <form class="calc-controls" id="calc-form">
+          <label class="field">
+            <span>Postcode</span>
+            <span class="input-row">
+              <input id="calc-postcode" placeholder="1234 AB" autocomplete="postal-code" pattern="\s*[1-9][0-9]{3}\s?[A-Za-z]{2}\s*">
+              <button class="btn btn-dark" type="submit">Ophalen</button>
+            </span>
+          </label>
+          <p class="calc-place" id="calc-place" aria-live="polite">Voorbeeld: De Bilt, langjarig gemiddelde</p>
+          <label class="field">
+            <span>Turbine</span>
+            <select id="calc-turbine"></select>
+          </label>
+          <label class="field">
+            <span>Zonnepanelen <output id="calc-panels-out">10</output></span>
+            <input type="range" id="calc-panels" min="0" max="24" value="10">
+          </label>
+          <label class="field">
+            <span>Stroomprijs <output id="calc-price-out">€ 0,30</output>/kWh</span>
+            <input type="range" id="calc-price" min="0.15" max="0.50" step="0.01" value="0.30">
+          </label>
+        </form>
+        <div class="calc-out">
+          <div class="chart" id="calc-chart" role="img" aria-label="Maandopbrengst wind en zon"></div>
+          <div class="legend"><span class="lg-wind">wind (turbine)</span><span class="lg-sun">zon (panelen)</span></div>
+          <div class="kpis" id="calc-kpis"></div>
+          <p class="fine">Indicatief model: Rayleigh-windverdeling per maand, hoogtecorrectie naar montagehoogte, 80% systeemrendement zon. Bronnen: PDOK Locatieserver, Open-Meteo (ERA5). Bebouwing en bomen vlak bij je huis kunnen de opbrengst verlagen — we checken dat gratis vóór installatie.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- BATTERIJ / ENERGIESTROOM -->
+    <section class="section flow" id="batterij" aria-labelledby="flow-title">
+      <div class="section-head">
+        <p class="eyebrow">Wind + batterij</p>
+        <h2 id="flow-title">Het net wordt je back-up, niet je levenslijn.</h2>
+        <p>Overdag zon, 's nachts en in de winter wind, de batterij overbrugt. Druk op de knop en zie wat er gebeurt bij een stroomstoring.</p>
+      </div>
+      <div class="flow-wrap">
+        <svg class="flow-svg" id="flow-svg" viewBox="0 0 640 340" role="img" aria-labelledby="flow-desc">
+          <desc id="flow-desc">Energiestroom: windturbine en zonnepanelen voeden de omvormer, die de thuisbatterij en het huis voedt. Het stroomnet is back-up.</desc>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker>
+          </defs>
+          <g class="flow-lines">
+            <path class="fl fl-wind" d="M110 80 C 200 80, 220 170, 300 170"/>
+            <path class="fl fl-sun" d="M110 260 C 200 260, 220 170, 300 170"/>
+            <path class="fl fl-bat" d="M340 170 L 440 90"/>
+            <path class="fl fl-house" d="M340 170 L 500 170"/>
+            <path class="fl fl-bathouse" d="M470 110 L 520 150"/>
+            <path class="fl fl-grid" d="M560 290 L 560 205"/>
+          </g>
+          <g class="node" transform="translate(70 80)"><circle r="38"/><text y="6">🌬️</text><text class="nl" y="58">wind</text></g>
+          <g class="node" transform="translate(70 260)"><circle r="38"/><text y="6">☀️</text><text class="nl" y="58">zon</text></g>
+          <g class="node node-inv" transform="translate(320 170)"><circle r="30"/><text y="6">⚡</text><text class="nl" y="50">omvormer</text></g>
+          <g class="node node-bat" transform="translate(460 80)"><circle r="34"/><text y="6">🔋</text><text class="nl" y="-44" id="bat-label">batterij 72%</text></g>
+          <g class="node node-house" transform="translate(560 170)"><circle r="40"/><text y="7" id="house-emoji">🏠</text><text class="nl" y="-50">jouw huis</text></g>
+          <g class="node node-grid" transform="translate(560 310)"><circle r="24"/><text y="6">🔌</text><text class="nl" y="-30" id="grid-label">net · back-up</text></g>
+        </svg>
+        <div class="flow-side">
+          <button class="btn btn-outage" id="outage-btn" aria-pressed="false">⚡ Simuleer stroomstoring</button>
+          <ol class="steps">
+            <li><b>Opwekken</b> De verticale rotor vangt wind uit elke richting — geen kruimechanisme, minder slijtage.</li>
+            <li><b>Opslaan</b> Overschot gaat eerst naar je batterij, pas daarna naar het net.</li>
+            <li><b>Gebruiken</b> 's Avonds en in de winter draai je op eigen stroom, zonder terugleverkosten.</li>
+            <li><b>Storing?</b> De eilandmodus neemt binnen 20 ms over. Koelkast, verwarming en router blijven aan.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- SALDERING -->
+    <section class="section saldering" id="saldering" aria-labelledby="sal-title">
+      <div class="sal-card">
+        <div>
+          <p class="eyebrow">Wetgeving 2027</p>
+          <h2 id="sal-title">Saldering stopt. Zelf gebruiken wordt goud waard.</h2>
+          <p>Vanaf 1 januari 2027 mag je teruggeleverde stroom niet meer wegstrepen tegen je verbruik. Wat je teruglevert brengt dan een lage terugleververgoeding op, terwijl stroom die je zelf gebruikt de volle prijs bespaart. Wind levert precies op de momenten dat je zelf verbruikt — 's avonds, 's nachts en in de winter.</p>
+        </div>
+        <div class="countdown" id="countdown" aria-label="Aftellen tot 1 januari 2027">
+          <div><b data-u="d">–</b><span>dagen</span></div>
+          <div><b data-u="h">–</b><span>uur</span></div>
+          <div><b data-u="m">–</b><span>min</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REVIEWS -->
+    <section class="section reviews" aria-labelledby="rev-title">
+      <div class="section-head">
+        <p class="eyebrow">Ervaringen <span class="demo-tag">voorbeeldcontent</span></p>
+        <h2 id="rev-title">Wat thuiswinders zeggen</h2>
+      </div>
+      <div class="rev-grid" id="reviews"></div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section faq" id="faq" aria-labelledby="faq-title">
+      <div class="section-head">
+        <p class="eyebrow">Veelgestelde vragen</p>
+        <h2 id="faq-title">Eerlijke antwoorden</h2>
+      </div>
+      <div class="faq-list">
+        <details name="faq" open>
+          <summary>Maken verticale turbines geen herrie?</summary>
+          <div>
+            <p>Nee. Onze rotors draaien langzaam (max. ~300 rpm). Op 2 meter afstand meet je 34–40 dB, afhankelijk van het model.</p>
+            <ul class="db-scale" aria-label="Geluidsvergelijking">
+              <li style="--w:30%"><span>Stil huis 's nachts</span><b>30 dB</b></li>
+              <li style="--w:36%" class="us"><span>Windvanger Zephyr</span><b>36 dB</b></li>
+              <li style="--w:40%"><span>Koelkast</span><b>35–45 dB</b></li>
+              <li style="--w:45%"><span>Warmtepomp</span><b>40–50 dB</b></li>
+              <li style="--w:60%"><span>Gesprek</span><b>60 dB</b></li>
+            </ul>
+          </div>
+        </details>
+        <details name="faq">
+          <summary>Heb ik een vergunning nodig?</summary>
+          <div><p>Gevel- en dakmodellen tot 2 meter boven de dakrand zijn in vrijwel alle gemeenten vergunningsvrij. Voor de 4 m-mast verschilt het per gemeente (soms max. 3 m of een afstand tot de erfgrens). Vul je postcode in bij de Windcheck: wij controleren het omgevingsplan van jouw gemeente gratis en helpen bij een eventuele aanvraag.</p></div>
+        </details>
+        <details name="faq">
+          <summary>Wat betekent het einde van de saldering voor mij?</summary>
+          <div><p>Vanaf 1 januari 2027 krijg je voor teruggeleverde stroom alleen nog een (lage) terugleververgoeding van je energieleverancier, en veel leveranciers rekenen terugleverkosten. Hoe meer stroom je zelf verbruikt of opslaat, hoe beter. Wind wekt vooral op wanneer zonnepanelen stilliggen, dus een groter deel gaat direct naar je eigen verbruik of batterij.</p></div>
+        </details>
+        <details name="faq">
+          <summary>Werkt het met mijn bestaande zonnepanelen en batterij?</summary>
+          <div><p>Ja. Elke turbine komt met een omvormer die parallel aan je zoninstallatie werkt, plus een koppelkit voor alle gangbare thuisbatterijen. Twijfel je? Stuur het merk en type door en we checken het binnen 1 werkdag.</p></div>
+        </details>
+        <details name="faq">
+          <summary>Wat levert een turbine écht op?</summary>
+          <div><p>Dat hangt sterk af van je locatie: aan de kust soms het dubbele van midden in een stad. Daarom tonen we geen mooie gemiddelden maar rekenen we met de gemeten wind van 2025 op jouw postcode. Doe de <a href="#windcheck">Windcheck</a> voor je eigen getal.</p></div>
+        </details>
+        <details name="faq">
+          <summary>Wat gebeurt er bij stroomuitval?</summary>
+          <div><p>Met een set met batterij schakelt de omvormer binnen 20 milliseconden over naar eilandmodus. De aangesloten groepen (koelkast, cv, router, verlichting) blijven gewoon werken, en de turbine blijft de batterij bijladen.</p></div>
+        </details>
+        <details name="faq">
+          <summary>Kan ik in termijnen betalen?</summary>
+          <div><p>Ja, met in3 betaal je in 3 delen zonder rente. Daarnaast iDEAL | Wero, Apple Pay, creditcard en op rekening voor zakelijke klanten.</p></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- NIEUWSBRIEF -->
+    <section class="section signup" aria-labelledby="signup-title">
+      <div class="signup-card">
+        <div>
+          <h2 id="signup-title">Ontvang de winterwind-update</h2>
+          <p>Eén mail per maand: opbrengsten van onze testlocaties, installatieverhalen en de eerste aanbiedingen. Uitschrijven kan altijd.</p>
+        </div>
+        <form id="signup-form" class="input-row">
+          <label class="sr-only" for="signup-email">E-mailadres</label>
+          <input id="signup-email" type="email" autocomplete="email" placeholder="jij@voorbeeld.nl" required>
+          <button class="btn btn-primary" type="submit">Aanmelden</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <strong>Windvanger</strong> — thuiswind sinds 2025
+      <p>Prototype-webshop. Producten, prijzen, reviews en opbrengsten zijn indicatief.</p>
+    </div>
+    <ul class="pay" aria-label="Betaalmethoden"><li>iDEAL | Wero</li><li>in3</li><li>Apple Pay</li><li>Visa / Mastercard</li></ul>
+  </footer>
+
+  <!-- Sticky mobiele balk -->
+  <div class="mobile-bar" id="mobile-bar">
+    <a class="btn btn-ghost" href="#windcheck">Windcheck</a>
+    <button class="btn btn-primary" id="mobile-cart">Winkelwagen · <span id="mobile-total">€ 0</span></button>
+  </div>
+
+  <!-- Winkelwagen -->
+  <dialog class="drawer" id="cart" aria-labelledby="cart-title">
+    <div class="drawer-head">
+      <h2 id="cart-title">Winkelwagen</h2>
+      <button class="icon-btn" data-close aria-label="Sluiten">✕</button>
+    </div>
+    <div class="ship-progress" id="ship-progress"></div>
+    <div class="drawer-body" id="cart-items"></div>
+    <div class="drawer-upsell" id="cart-upsell"></div>
+    <div class="drawer-foot">
+      <div class="total-row"><span>Totaal incl. btw</span><b id="cart-total">€ 0</b></div>
+      <div class="in3" id="cart-in3"></div>
+      <button class="btn btn-primary btn-block" id="checkout-btn">Veilig afrekenen</button>
+      <p class="fine center">30 dagen bedenktijd · 10 jaar garantie · gratis retour</p>
+    </div>
+  </dialog>
+
+  <!-- Productdetail -->
+  <dialog class="modal" id="product-modal" aria-labelledby="pm-title">
+    <button class="icon-btn modal-close" data-close aria-label="Sluiten">✕</button>
+    <div id="pm-body"></div>
+  </dialog>
+
+  <!-- Vergelijken -->
+  <div class="compare-bar" id="compare-bar" hidden>
+    <span id="compare-label">0 geselecteerd</span>
+    <button class="btn btn-dark" id="compare-open">Vergelijk</button>
+    <button class="icon-btn" id="compare-clear" aria-label="Selectie wissen">✕</button>
+  </div>
+  <dialog class="modal modal-wide" id="compare-modal" aria-labelledby="cmp-title">
+    <button class="icon-btn modal-close" data-close aria-label="Sluiten">✕</button>
+    <h2 id="cmp-title">Vergelijken</h2>
+    <div class="table-scroll" id="compare-table"></div>
+  </dialog>
+
+  <!-- Afrekenen (demo) -->
+  <dialog class="modal" id="checkout" aria-labelledby="co-title">
+    <button class="icon-btn modal-close" data-close aria-label="Sluiten">✕</button>
+    <h2 id="co-title">Afrekenen</h2>
+    <p class="demo-note">Demo — er wordt niets verstuurd of afgeschreven.</p>
+    <form id="checkout-form" class="co-form">
+      <div class="express">
+        <button type="button" class="btn btn-express">Apple&nbsp;Pay</button>
+        <button type="button" class="btn btn-express">iDEAL | Wero</button>
+      </div>
+      <p class="or"><span>of vul je gegevens in</span></p>
+      <label class="field"><span>E-mail</span><input type="email" autocomplete="email" required></label>
+      <div class="two">
+        <label class="field"><span>Postcode</span><input id="co-postcode" autocomplete="postal-code" required placeholder="1234 AB"></label>
+        <label class="field"><span>Huisnummer</span><input id="co-number" autocomplete="address-line2" required inputmode="numeric"></label>
+      </div>
+      <p class="addr" id="co-address" aria-live="polite"></p>
+      <fieldset class="field">
+        <legend>Betaalmethode</legend>
+        <div class="choices compact">
+          <label><input type="radio" name="pay" value="ideal" checked><span>iDEAL | Wero</span></label>
+          <label><input type="radio" name="pay" value="in3"><span>in3 · 3 termijnen</span></label>
+          <label><input type="radio" name="pay" value="card"><span>Creditcard</span></label>
+        </div>
+      </fieldset>
+      <div class="total-row"><span>Te betalen</span><b id="co-total">€ 0</b></div>
+      <button class="btn btn-primary btn-block" type="submit">Bestelling plaatsen</button>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="application/ld+json" id="ld-products"></script>
+</body>
+</html>
