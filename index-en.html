@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WINDVANGER — Vertical wind turbines for your home</title>
+  <meta name="description" content="Silent vertical wind turbines for home use, linked to your home battery. Power in winter too, even when the grid goes down.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <a class="skip" href="#shop">Skip to the shop</a>
+
+  <header class="site-header">
+    <a class="logo" href="#top" aria-label="Windvanger home">
+      <svg viewBox="0 0 32 32" class="logo-mark" aria-hidden="true">
+        <path d="M16 3v26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        <path class="spin" d="M16 7 C 22 8, 24 13, 21 16 C 18 13, 16 11, 16 7 Z" fill="currentColor"/>
+        <path class="spin spin-2" d="M16 7 C 10 8, 8 13, 11 16 C 14 13, 16 11, 16 7 Z" fill="currentColor" opacity=".7"/>
+      </svg>
+      <span>WIND<span class="accent">CATCHER</span></span>
+    </a>
+    <nav class="main-nav" aria-label="Main menu">
+      <a href="#shop">Turbines</a>
+      <a href="#batterij">Home battery</a>
+      <a href="#grid">Grid-independent</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <button class="theme-btn" id="theme-toggle" aria-label="Toggle light/dark theme" title="Light/dark theme">◐</button>
+    <a class="lang-btn" href="index.html" hreflang="nl">NL</a>
+    <button class="cart-btn" id="cart-open" aria-haspopup="dialog">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M6 6h15l-1.5 9h-12L6 6z"/><path d="M6 6L5 3H2"/><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/>
+      </svg>
+      Cart <span class="cart-count" id="cart-count">0</span>
+    </button>
+  </header>
+
+  <main id="top">
+
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="kicker mono">// Home wind, all year round</p>
+        <h1>Wind spins <em>through</em> the winter.</h1>
+        <p class="lede">
+          Solar panels go quiet when it's cold and grey. Our vertical wind turbines
+          spin hardest exactly then — silent, safe, mounted on your own wall or roof.
+          Pair them with your home battery and keep your lights, heating and internet,
+          <strong>even when the grid goes down</strong>.
+        </p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#shop">Browse the turbines</a>
+          <a class="btn btn-ghost" href="#batterij">How the battery pairing works</a>
+        </div>
+        <ul class="hero-stats mono">
+          <li><strong>38 dB</strong><span>whisper-quiet</span></li>
+          <li><strong>4 m/s</strong><span>starts in a light breeze</span></li>
+          <li><strong>24/7</strong><span>generation, even at night</span></li>
+        </ul>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="turbine turbine-xl">
+          <div class="pole"></div>
+          <div class="rotor">
+            <div class="blade b1"></div><div class="blade b2"></div><div class="blade b3"></div>
+          </div>
+        </div>
+        <div class="turbine turbine-sm">
+          <div class="pole"></div>
+          <div class="rotor">
+            <div class="blade b1"></div><div class="blade b2"></div><div class="blade b3"></div>
+          </div>
+        </div>
+        <div class="wind-lines">
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="shop" id="shop">
+      <div class="section-head">
+        <h2>Our turbines</h2>
+        <p>Every turbine ships with an inverter and a plug-and-play pairing kit for your home battery.</p>
+      </div>
+      <div class="filters" role="tablist" aria-label="Filter turbines">
+        <button class="chip active" data-filter="all">All</button>
+        <button class="chip" data-filter="gevel">Wall</button>
+        <button class="chip" data-filter="dak">Roof</button>
+        <button class="chip" data-filter="tuin">Garden / mast</button>
+        <button class="chip" data-filter="batterij">With battery bundle</button>
+      </div>
+      <div class="product-grid" id="product-grid"></div>
+    </section>
+
+    <section class="battery" id="batterij">
+      <div class="section-head">
+        <h2>Wind in your battery.</h2>
+        <p>A turbine without storage is nice. A turbine with a home battery is independence.</p>
+      </div>
+      <div class="battery-grid">
+        <article class="b-card">
+          <span class="b-num mono">01</span>
+          <h3>Generate</h3>
+          <p>The vertical rotor catches wind from any direction — no yaw mechanism needed, so less wear and no noise nuisance.</p>
+        </article>
+        <article class="b-card">
+          <span class="b-num mono">02</span>
+          <h3>Store</h3>
+          <p>The inverter charges your home battery directly. Surplus? The battery fills first, only then is power fed back to the grid.</p>
+        </article>
+        <article class="b-card">
+          <span class="b-num mono">03</span>
+          <h3>Use</h3>
+          <p>In the evenings and winter months you draw from your own storage. No transmission costs, no dependency.</p>
+        </article>
+        <article class="b-card b-card-accent">
+          <span class="b-num mono">04</span>
+          <h3>Grid goes down?</h3>
+          <p>Our island mode switches over automatically: your battery keeps your fridge, heating and router running.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="grid" id="grid">
+      <div class="section-head">
+        <h2>Not just solar. Not just the grid.</h2>
+        <p>Solar, wind and storage together make your home truly self-sufficient.</p>
+      </div>
+      <div class="grid-viz mono" role="img" aria-label="Diagram: wind and solar charge the battery, the house runs on the battery, grid is backup">
+        <div class="gv-node"><span>🌬️ Wind</span></div>
+        <div class="gv-node"><span>☀️ Solar</span></div>
+        <div class="gv-node gv-core"><span>🔋 Battery</span></div>
+        <div class="gv-node"><span>🏠 Home</span></div>
+        <div class="gv-node gv-muted"><span>⚡ Grid (backup)</span></div>
+      </div>
+      <p class="grid-note">
+        Wind in winter, sun in summer, battery as the bridge.
+        <strong>The grid becomes your backup, not your lifeline.</strong>
+      </p>
+    </section>
+
+    <section class="faq" id="faq">
+      <div class="section-head">
+        <h2>Frequently asked questions</h2>
+      </div>
+      <div class="faq-list">
+        <details>
+          <summary>Aren't vertical turbines noisy?</summary>
+          <p>No. Our Savonius and helix rotors spin slowly (max ~300 rpm) and measure around <strong>38 dB</strong> at 2 metres — comparable to a quiet bedroom.</p>
+        </details>
+        <details>
+          <summary>Do I need a permit?</summary>
+          <p>In most Dutch and Belgian municipalities our wall and roof models fall under the permit-free building track. For mast models we help you with the application.</p>
+        </details>
+        <details>
+          <summary>Does this work with my existing solar panels and battery?</summary>
+          <p>Yes. Every turbine ships with a hybrid inverter that connects in parallel with your solar setup. Already have a home battery (e.g. from your solar installer)? We link to it via the pairing kit.</p>
+        </details>
+        <details>
+          <summary>What does such a turbine really generate per year?</summary>
+          <p>At a typical Dutch site with decent wind (4–6 m/s average): the <strong>Breeze</strong> ± 400 kWh/year, the <strong>Stormbird</strong> ± 1,800 kWh/year. That's roughly 10% and 50% of an average household respectively.</p>
+        </details>
+        <details>
+          <summary>What happens during a power outage?</summary>
+          <p>The inverter's island mode takes over within 20 milliseconds. You won't notice — except that your neighbours are sitting in the dark.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="calc" id="calculator">
+      <div class="section-head">
+        <h2>What does wind deliver vs. solar?</h2>
+        <p>Enter your situation and see month by month how many kWh a turbine delivers alongside your solar panels — based on average Dutch sun and wind data.</p>
+      </div>
+      <div class="calc-panel">
+        <div class="calc-inputs">
+          <label class="calc-field">
+            <span>Solar panels</span>
+            <input type="range" id="calc-solar" min="0" max="20" step="1" value="8">
+            <output class="mono" id="calc-solar-out">8 panels (± 2.9 kWp)</output>
+          </label>
+          <label class="calc-field">
+            <span>Turbine</span>
+            <select id="calc-turbine">
+              <option value="150">Havik Mini — 150 W</option>
+              <option value="300" selected>Bries — 300 W</option>
+              <option value="600">Zephyr — 600 W</option>
+              <option value="1500">Stormvogel — 1.500 W</option>
+            </select>
+          </label>
+          <label class="calc-field">
+            <span>Electricity price</span>
+            <input type="number" id="calc-price" min="0.10" max="1.00" step="0.01" value="0.33">
+            <output class="mono">€/kWh</output>
+          </label>
+        </div>
+        <div class="calc-chart" id="calc-chart" role="img" aria-label="Maandgrafiek zon versus wind opbrengst"></div>
+        <div class="calc-results mono" id="calc-results"></div>
+      </div>
+    </section>
+
+    <section class="newsletter">
+    <section class="newsletter">
+      <h2>Riding the wind?</h2>
+      <p>Get launch deals, installation stories and wind data from test sites in your inbox.</p>
+      <form class="newsletter-form" id="newsletter-form">
+        <input type="email" required placeholder="you@example.com" aria-label="Email address">
+        <button class="btn btn-primary" type="submit">Sign up</button>
+      </form>
+      <p class="form-msg mono" id="newsletter-msg" role="status"></p>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p class="mono">WINDCATCHER — Home wind since 2025 · CoC 0000000000 (demo)</p>
+    <p>Prototype webshop. Products, prices and yields are indicative.</p>
+  </footer>
+
+  <!-- Cart -->
+  <div class="cart-overlay" id="cart-overlay" hidden></div>
+  <aside class="cart" id="cart" role="dialog" aria-modal="true" aria-label="Cart" hidden>
+    <header class="cart-head">
+      <h2>Cart</h2>
+      <button class="cart-close" id="cart-close" aria-label="Sluiten">✕</button>
+    </header>
+    <ul class="cart-items" id="cart-items"></ul>
+    <p class="cart-empty" id="cart-empty">All quiet here… <br>Add a turbine!</p>
+    <footer class="cart-foot">
+      <div class="cart-total mono"><span>Subtotal</span><span id="cart-total">€ 0</span></div>
+      <p class="cart-hint mono">Free delivery &amp; mounting kits with every order</p>
+      <button class="btn btn-primary btn-block" id="checkout">Checkout (demo)</button>
+    </footer>
+  </aside>
+
+  <!-- Productmodal -->
+  <div class="modal-overlay" id="modal-overlay" hidden></div>
+  <div class="modal" id="modal" role="dialog" aria-modal="true" hidden>
+    <button class="modal-close" id="modal-close" aria-label="Sluiten">✕</button>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+
+  <div class="toast mono" id="toast" role="status" aria-live="polite"></div>
+
+  <template id="tpl-product">
+    <article class="product">
+      <div class="product-art">
+        <div class="turbine">
+          <div class="pole"></div>
+          <div class="rotor"><div class="blade b1"></div><div class="blade b2"></div><div class="blade b3"></div></div>
+        </div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name"></h3>
+        <p class="product-tag mono"></p>
+        <p class="product-desc"></p>
+        <ul class="product-specs mono"></ul>
+        <div class="product-foot">
+          <span class="product-price"></span>
+          <button class="btn btn-primary btn-sm add" type="button">Add to cart</button>
+        </div>
+        <button class="link-more" type="button">Details &amp; yield →</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="js/data.js"></script>
+  <script src="js/shop.js"></script>
+</body>
+</html>
