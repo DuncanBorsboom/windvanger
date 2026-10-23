@@ -96,11 +96,16 @@
           <label class="calc-field">
             <span>Turbine</span>
             <select id="calc-turbine">
-              <option value="150">Havik Mini — 150 W</option>
-              <option value="300" selected>Bries — 300 W</option>
+              <option value="150">Hawk Mini — 150 W</option>
+              <option value="300" selected>Breeze — 300 W</option>
               <option value="600">Zephyr — 600 W</option>
-              <option value="1500">Stormvogel — 1.500 W</option>
+              <option value="1500">Stormbird — 1,500 W</option>
             </select>
+          </label>
+          <label class="calc-field">
+            <span>Number of turbines</span>
+            <input type="range" id="calc-count" min="1" max="6" step="1" value="2">
+            <output class="mono" id="calc-count-out">2 turbines</output>
           </label>
           <label class="calc-field">
             <span>Electricity price</span>

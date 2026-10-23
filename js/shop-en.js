@@ -214,6 +214,8 @@
     const solarEl = document.getElementById("calc-solar");
     const solarOut = document.getElementById("calc-solar-out");
     const turbineEl = document.getElementById("calc-turbine");
+    const countEl = document.getElementById("calc-count");
+    const countOut = document.getElementById("calc-count-out");
     const priceEl = document.getElementById("calc-price");
     const chart = document.getElementById("calc-chart");
     const results = document.getElementById("calc-results");
@@ -241,9 +243,11 @@
       const watt = +turbineEl.value;
       const prijs = +priceEl.value || 0.33;
       solarOut.textContent = panelen + " panels (± " + (panelen * 0.365).toFixed(1).replace(".", ",") + " kWp)";
+      if (countOut) countOut.textContent = aantal + (aantal === 1 ? " turbine" : " turbines");
 
       const zonnen = MAANDEN.map((_, i) => solarKwh(i, panelen));
-      const winden = MAANDEN.map((_, i) => windKwh(i, watt));
+      const aantal = +(countEl ? countEl.value : 1);
+      const winden = MAANDEN.map((_, i) => windKwh(i, watt) * aantal);
       const max = Math.max(...winden, ...zonnen, 1);
 
       chart.innerHTML = "";
@@ -275,7 +279,7 @@
 
       results.innerHTML = "";
       [
-        [Math.round(totWind) + " kWh", "wind yield turbine per year ≈ € " + besparingFmt(besparing)],
+        [Math.round(totWind) + " kWh", "wind yield " + aantal + "× turbine per year ≈ € " + besparingFmt(besparing)],
         [Math.round(totZon) + " kWh", "solar yield " + panelen + " panels per year"],
         [Math.round(winterWind) + " kWh", "wind in winter (Nov–Feb)"],
         [Math.round(winterZon) + " kWh", "solar in winter (Nov–Feb) — compare!"]
@@ -295,7 +299,7 @@
       return n.toLocaleString("en-GB", { maximumFractionDigits: 0 });
     }
 
-    [solarEl, turbineEl, priceEl].forEach(el => el.addEventListener("input", render));
+    [solarEl, turbineEl, priceEl, countEl].forEach(el => el.addEventListener("input", render));
     render();
   })();
 
