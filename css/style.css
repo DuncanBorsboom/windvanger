@@ -321,9 +321,12 @@ details[open] { border-color: var(--accent); }
 .calc-bar .bar-month { text-align: center; font-size: .68rem; color: var(--muted); font-family: var(--font-mono); padding-top: .35rem; }
 .calc-results {
   display: grid; gap: .8rem;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
 }
-@media (max-width: 720px) {
+@media (max-width: 1000px) {
+  .calc-results { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 640px) {
   .calc-results { grid-template-columns: repeat(2, 1fr); }
 }
 .calc-stat {

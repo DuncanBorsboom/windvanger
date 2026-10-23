@@ -276,13 +276,17 @@
       const winterWind = winden.slice(10).concat(winden.slice(0, 2)).reduce((a, b) => a + b, 0);
       const winterZon = zonnen.slice(10).concat(zonnen.slice(0, 2)).reduce((a, b) => a + b, 0);
       const besparing = (totWind) * prijs;
+      const stukprijs = +(turbineEl.selectedOptions[0].dataset.price || 0);
+      const investering = stukprijs * aantal;
+      const terugverdient = besparing > 0 ? investering / besparing : 0;
 
       results.innerHTML = "";
       [
         [Math.round(totWind) + " kWh", "wind yield " + aantal + "× turbine per year ≈ € " + besparingFmt(besparing)],
         [Math.round(totZon) + " kWh", "solar yield " + panelen + " panels per year"],
         [Math.round(winterWind) + " kWh", "wind in winter (Nov–Feb)"],
-        [Math.round(winterZon) + " kWh", "solar in winter (Nov–Feb) — compare!"]
+        [Math.round(winterZon) + " kWh", "solar in winter (Nov–Feb) — compare!"],
+        [terugverdient > 0 ? Math.round(terugverdient) + " yrs" : "—", "payback time ≈ € " + investering.toLocaleString("en-GB") + " investment"]
       ].forEach(([v, l]) => {
         const stat = document.createElement("div");
         stat.className = "calc-stat";
