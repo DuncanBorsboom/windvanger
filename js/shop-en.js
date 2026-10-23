@@ -242,11 +242,11 @@
       const panelen = +solarEl.value;
       const watt = +turbineEl.value;
       const prijs = +priceEl.value || 0.33;
-      solarOut.textContent = panelen + " panels (± " + (panelen * 0.365).toFixed(1).replace(".", ",") + " kWp)";
+      const aantal = +(countEl ? countEl.value : 1);
+      solarOut.textContent = panelen + " panels (± " + (panelen * 0.365).toFixed(1) + " kWp)";
       if (countOut) countOut.textContent = aantal + (aantal === 1 ? " turbine" : " turbines");
 
       const zonnen = MAANDEN.map((_, i) => solarKwh(i, panelen));
-      const aantal = +(countEl ? countEl.value : 1);
       const winden = MAANDEN.map((_, i) => windKwh(i, watt) * aantal);
       const max = Math.max(...winden, ...zonnen, 1);
 
