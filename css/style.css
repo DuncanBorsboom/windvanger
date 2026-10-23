@@ -320,6 +320,20 @@ details[open] { border-color: var(--accent); }
 }
 .calc-field select:focus, .calc-field input:focus { outline: none; border-color: var(--accent); }
 .calc-field output { color: var(--accent-2); font-size: .8rem; }
+.calc-modes {
+  display: flex; gap: .6rem; justify-content: center;
+  margin-bottom: .4rem;
+}
+.calc-mode {
+  background: var(--panel); color: var(--muted);
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: .45rem 1.2rem; font: 600 .82rem var(--font-head);
+  cursor: pointer;
+}
+.calc-mode:hover { color: var(--text); }
+.calc-mode.active {
+  background: var(--accent); border-color: var(--accent); color: var(--ink);
+}
 .calc-legend {
   display: flex; gap: 1.4rem; justify-content: center;
   font-family: var(--font-mono); font-size: .75rem; color: var(--muted);

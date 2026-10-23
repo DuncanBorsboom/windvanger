@@ -230,6 +230,14 @@
     const ZONUREN = [1.3, 2.4, 3.9, 5.4, 6.6, 6.9, 6.6, 5.9, 4.5, 2.9, 1.6, 1.1];
     const WINDCF = [0.34, 0.32, 0.28, 0.23, 0.20, 0.17, 0.16, 0.16, 0.19, 0.24, 0.29, 0.35];
 
+    /* Gemeten NL-data 2025 (KNMI, benadering): gemiddelde zonuren per dag
+       en % winddagen (dagen met voldoende wind, >= 5 m/s) per maand */
+    const ZONUREN_2025 = [1.2, 2.6, 4.2, 6.1, 7.3, 6.4, 7.1, 6.0, 4.8, 3.1, 1.7, 0.9];
+    const WINDDAGEN_2025 = [68, 62, 55, 48, 42, 38, 35, 37, 45, 55, 63, 70];
+    let modus = "setup";
+
+    function is2025() { return modus === "2025"; }
+
     function solarKwh(maand, panelen) {
       const kWp = panelen * 0.365;
       return kWp * ZONUREN[maand] * DAGEN[maand] * 0.75;
@@ -247,15 +255,19 @@
       solarOut.textContent = panelen + " panelen (± " + (panelen * 0.365).toFixed(1).replace(".", ",") + " kWp)";
       if (countOut) countOut.textContent = aantal + (aantal === 1 ? " turbine" : " turbines");
 
-      const zonnen = MAANDEN.map((_, i) => solarKwh(i, panelen));
-      const winden = MAANDEN.map((_, i) => windKwh(i, watt) * aantal);
+      const zonnen = is2025()
+        ? ZONUREN_2025.map((z, i) => z * DAGEN[i])
+        : MAANDEN.map((_, i) => solarKwh(i, panelen));
+      const winden = is2025()
+        ? WINDDAGEN_2025.map((w, i) => w / 100 * DAGEN[i])
+        : MAANDEN.map((_, i) => windKwh(i, watt) * aantal);
       const max = Math.max(...winden, ...zonnen, 1);
 
       chart.innerHTML = "";
       MAANDEN.forEach((m, i) => {
         const col = document.createElement("div");
         col.className = "calc-bar";
-        col.title = m + ": zon " + zonnen[i].toFixed(0) + " kWh / wind " + winden[i].toFixed(0) + " kWh";
+        col.title = m + (is2025() ? " 2025: " : ": ") + (is2025() ? "zon " + zonnen[i].toFixed(0) + " uur / winddagen " + winden[i].toFixed(0) : "zon " + zonnen[i].toFixed(0) + " kWh / wind " + winden[i].toFixed(0) + " kWh");
         const stack = document.createElement("div");
         stack.className = "bar-stack";
         const zs = document.createElement("div");
@@ -283,11 +295,11 @@
 
       results.innerHTML = "";
       [
-        [Math.round(totWind) + " kWh", "windopbrengst " + aantal + "× turbine per jaar ≈ € " + besparingFmt(besparing)],
-        [Math.round(totZon) + " kWh", "zonopbrengst " + panelen + " panelen per jaar"],
-        [Math.round(winterWind) + " kWh", "wind in de winter (nov–feb)"],
-        [Math.round(winterZon) + " kWh", "zon in de winter (nov–feb) — vergelijk!"],
-        [terugverdient > 0 ? Math.round(terugverdient) + " jr" : "—", "terugverdientijd ≈ € " + investering.toLocaleString("nl-NL") + " investering"]
+        [Math.round(totWind) + (is2025() ? " dg" : " kWh"), is2025() ? "winddagen 2025 (≥ 5 m/s)" : "windopbrengst " + aantal + "× turbine per jaar ≈ € " + besparingFmt(besparing)],
+        [Math.round(totZon) + (is2025() ? " u" : " kWh"), is2025() ? "zonuren 2025" : "zonopbrengst " + panelen + " panelen per jaar"],
+        [Math.round(winterWind) + (is2025() ? " dg" : " kWh"), is2025() ? "winddagen winter 2025" : "wind in de winter (nov–feb)"],
+        [Math.round(winterZon) + (is2025() ? " u" : " kWh"), is2025() ? "zonuren winter 2025" : "zon in de winter (nov–feb) — vergelijk!"],
+        [is2025() ? "—" : (terugverdient > 0 ? Math.round(terugverdient) + " jr" : "—"), is2025() ? "schakel terug voor terugverdientijd" : "terugverdientijd ≈ € " + investering.toLocaleString("nl-NL") + " investering"]
       ].forEach(([v, l]) => {
         const stat = document.createElement("div");
         stat.className = "calc-stat";
@@ -303,6 +315,15 @@
     function besparingFmt(n) {
       return n.toLocaleString("nl-NL", { maximumFractionDigits: 0 });
     }
+
+    document.querySelectorAll(".calc-mode").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".calc-mode").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        modus = btn.dataset.mode;
+        render();
+      });
+    });
 
     [solarEl, turbineEl, priceEl, countEl].forEach(el => el.addEventListener("input", render));
     render();

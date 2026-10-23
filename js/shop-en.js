@@ -229,6 +229,14 @@
     const ZONUREN = [1.3, 2.4, 3.9, 5.4, 6.6, 6.9, 6.6, 5.9, 4.5, 2.9, 1.6, 1.1];
     const WINDCF = [0.34, 0.32, 0.28, 0.23, 0.20, 0.17, 0.16, 0.16, 0.19, 0.24, 0.29, 0.35];
 
+    /* Gemeten NL-data 2025 (KNMI, benadering): gemiddelde zonuren per dag
+       en % winddagen (dagen met voldoende wind, >= 5 m/s) per maand */
+    const ZONUREN_2025 = [1.2, 2.6, 4.2, 6.1, 7.3, 6.4, 7.1, 6.0, 4.8, 3.1, 1.7, 0.9];
+    const WINDDAGEN_2025 = [68, 62, 55, 48, 42, 38, 35, 37, 45, 55, 63, 70];
+    let modus = "setup";
+
+    function is2025() { return modus === "2025"; }
+
     function solarKwh(maand, panelen) {
       const kWp = panelen * 0.365;
       return kWp * ZONUREN[maand] * DAGEN[maand] * 0.75;
@@ -246,15 +254,19 @@
       solarOut.textContent = panelen + " panels (± " + (panelen * 0.365).toFixed(1) + " kWp)";
       if (countOut) countOut.textContent = aantal + (aantal === 1 ? " turbine" : " turbines");
 
-      const zonnen = MAANDEN.map((_, i) => solarKwh(i, panelen));
-      const winden = MAANDEN.map((_, i) => windKwh(i, watt) * aantal);
+      const zonnen = is2025()
+        ? ZONUREN_2025.map((z, i) => z * DAGEN[i])
+        : MAANDEN.map((_, i) => solarKwh(i, panelen));
+      const winden = is2025()
+        ? WINDDAGEN_2025.map((w, i) => w / 100 * DAGEN[i])
+        : MAANDEN.map((_, i) => windKwh(i, watt) * aantal);
       const max = Math.max(...winden, ...zonnen, 1);
 
       chart.innerHTML = "";
       MAANDEN.forEach((m, i) => {
         const col = document.createElement("div");
         col.className = "calc-bar";
-        col.title = m + ": solar " + zonnen[i].toFixed(0) + " kWh / wind " + winden[i].toFixed(0) + " kWh";
+        col.title = m + (is2025() ? " 2025: " : ": ") + (is2025() ? "sun " + zonnen[i].toFixed(0) + " hours / windy days " + winden[i].toFixed(0) : "solar " + zonnen[i].toFixed(0) + " kWh / wind " + winden[i].toFixed(0) + " kWh");
         const stack = document.createElement("div");
         stack.className = "bar-stack";
         const zs = document.createElement("div");
@@ -282,11 +294,11 @@
 
       results.innerHTML = "";
       [
-        [Math.round(totWind) + " kWh", "wind yield " + aantal + "× turbine per year ≈ € " + besparingFmt(besparing)],
-        [Math.round(totZon) + " kWh", "solar yield " + panelen + " panels per year"],
-        [Math.round(winterWind) + " kWh", "wind in winter (Nov–Feb)"],
-        [Math.round(winterZon) + " kWh", "solar in winter (Nov–Feb) — compare!"],
-        [terugverdient > 0 ? Math.round(terugverdient) + " yrs" : "—", "payback time ≈ € " + investering.toLocaleString("en-GB") + " investment"]
+        [Math.round(totWind) + (is2025() ? " d" : " kWh"), is2025() ? "windy days 2025 (≥ 5 m/s)" : "wind yield " + aantal + "× turbine per year ≈ € " + besparingFmt(besparing)],
+        [Math.round(totZon) + (is2025() ? " h" : " kWh"), is2025() ? "sun hours 2025" : "solar yield " + panelen + " panels per year"],
+        [Math.round(winterWind) + (is2025() ? " d" : " kWh"), is2025() ? "windy days winter 2025" : "wind in winter (Nov–Feb)"],
+        [Math.round(winterZon) + (is2025() ? " h" : " kWh"), is2025() ? "sun hours winter 2025" : "solar in winter (Nov–Feb) — compare!"],
+        [is2025() ? "—" : (terugverdient > 0 ? Math.round(terugverdient) + " yrs" : "—"), is2025() ? "switch back for payback time" : "payback time ≈ € " + investering.toLocaleString("en-GB") + " investment"]
       ].forEach(([v, l]) => {
         const stat = document.createElement("div");
         stat.className = "calc-stat";
@@ -302,6 +314,15 @@
     function besparingFmt(n) {
       return n.toLocaleString("en-GB", { maximumFractionDigits: 0 });
     }
+
+    document.querySelectorAll(".calc-mode").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".calc-mode").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        modus = btn.dataset.mode;
+        render();
+      });
+    });
 
     [solarEl, turbineEl, priceEl, countEl].forEach(el => el.addEventListener("input", render));
     render();
