@@ -5,11 +5,20 @@ const PRODUCTS = [
     tag: "Wall · starter model",
     type: ["gevel"],
     price: 749,
-    desc: "Compact helix rotor for your wall or shed. Perfect as your first wind power, or to complement your solar panels in the dark months.",
-    specs: ["300 W piek", "38 dB", "4 m/s start", "2,4 kg"],
-    yield: "± 400 kWh/jaar at 5 m/s",
-    mount: "Wall / shed, brackets included",
-    battery: "Pairing kit for all common home batteries included"
+    priceWithout: 689,
+    controller: "MPPT wind charge controller, 12/24 V · 30 A (CE)",
+    desc: "Compact lantern-helix rotor for your wall or shed. Perfect as your first wind power, or to complement your solar panels in the dark months.",
+    specs: ["300 W peak", "38 dB", "4 m/s start", "2.4 kg"],
+    yield: "40–150 kWh/year (open location, 4–6 m/s average wind)",
+    mount: "Wall / shed, brackets included (ø 54–80 mm tube)",
+    battery: "Pairing kit for all common home batteries included",
+    tech: [
+      "Rotor: lantern-helix (Savonius type), 5 blades, nylon fibre, Ø 0.9 m",
+      "Generator: 3-phase permanent-magnet generator (PMG), low starting torque",
+      "System voltage: DC 12 V · cut-in 2.5 m/s · rated 12 m/s · survival 45 m/s",
+      "Electromagnetic brake above 300 rpm · IP67 · −40 °C to 80 °C",
+      "CE-marked · EU declaration of conformity and permit pack included"
+    ]
   },
   {
     id: "zephyr",
@@ -17,11 +26,20 @@ const PRODUCTS = [
     tag: "Roof · single-home",
     type: ["dak"],
     price: 1290,
+    priceWithout: 1229,
+    controller: "MPPT wind charge controller, 24 V · 30 A (CE)",
     desc: "Our bestseller (3 months in = #1 by reviews). Silent vertical turbine with double-helix rotor, made for family homes.",
-    specs: ["600 W piek", "36 dB", "3,5 m/s start", "Roof mount included"],
-    yield: "± 900 kWh/jaar at 5 m/s",
+    specs: ["600 W peak", "36 dB", "3.5 m/s start", "Roof mount included"],
+    yield: "80–250 kWh/year (open location, 4–6 m/s average wind)",
     mount: "Chimney or ridge mount (fitting kit included)",
-    battery: "Hybrid inverter syncs with your home battery"
+    battery: "Hybrid inverter syncs with your home battery",
+    tech: [
+      "Rotor: double helix, FRP composite blades, Ø 1.1 m",
+      "Generator: 3-phase coreless PMG, low starting torque",
+      "System voltage: DC 24 V · cut-in 2.5 m/s · rated 12 m/s · survival 45 m/s",
+      "Electromagnetic brake above 300 rpm · IP67 · −40 °C to 80 °C",
+      "CE-marked · EU declaration of conformity and permit pack included"
+    ]
   },
   {
     id: "stormvogel",
@@ -29,11 +47,20 @@ const PRODUCTS = [
     tag: "Garden · mast model",
     type: ["tuin"],
     price: 2490,
+    priceWithout: 2415,
+    controller: "MPPT hybrid wind/solar controller, 48 V · 60 A (CE)",
     desc: "The powerhouse. On a 4m mast in your garden, with catch arms that protect the rotor and boost yield. For families serious about self-sufficiency.",
-    specs: ["1,5 kW piek", "40 dB", "3 m/s start", "4 m mast"],
-    yield: "± 1.800 kWh/jaar at 5.5 m/s",
+    specs: ["1.5 kW peak", "40 dB", "3 m/s start", "4 m mast"],
+    yield: "150–500 kWh/year (open, windy location)",
     mount: "Free-standing mast, concrete base or ground screws",
-    battery: "Charges up to 2 home batteries in parallel"
+    battery: "Charges up to 2 home batteries in parallel",
+    tech: [
+      "Rotor: swept-arm helix, reinforced nylon blades, Ø 1.6 m",
+      "Generator: 3-phase PMG, electromagnetic brake",
+      "System voltage: DC 48 V · cut-in 3 m/s · rated 12 m/s · survival 45 m/s",
+      "Mast: 4 m galvanised steel, concrete base or ground screws",
+      "CE-marked · EU declaration of conformity and permit pack included"
+    ]
   },
   {
     id: "havik-mini",
@@ -41,11 +68,19 @@ const PRODUCTS = [
     tag: "Wall · apartment",
     type: ["gevel"],
     price: 549,
+    priceWithout: 509,
+    controller: "MPPT wind charge controller, 12 V · 15 A (CE)",
     desc: "Small balcony turbine for apartments and urban gardens. Starts in a gentle breeze and spins almost silently.",
-    specs: ["150 W piek", "< 35 dB", "3 m/s start", "1,8 kg"],
-    yield: "± 200 kWh/jaar at 4.5 m/s",
-    mount: "Balcony or wall, no permit needed",
-    battery: "Plug-in pairing kit (e.g. for plug-in batteries)"
+    specs: ["150 W peak", "< 35 dB", "3 m/s start", "1.8 kg"],
+    yield: "15–60 kWh/year (sheltered urban spot)",
+    mount: "Balcony or wall — free permit check included",
+    battery: "Plug-in pairing kit (e.g. for plug-in batteries)",
+    tech: [
+      "Rotor: mini lantern, 5 blades, nylon fibre",
+      "Generator: 3-phase PMG, low starting torque",
+      "System voltage: DC 12 V · IP67",
+      "CE-marked · EU declaration of conformity included"
+    ]
   },
   {
     id: "noorderstorm-bundle",
@@ -55,10 +90,15 @@ const PRODUCTS = [
     price: 3790,
     oldPrice: 4280,
     desc: "Complete winter kit: Stormbird roof turbine + 5 kWh home battery with island mode. Even when the grid goes down you keep your lights, heating and internet.",
-    specs: ["1,5 kW piek", "5 kWh storage", "Island mode", "20 ms switchover"],
-    yield: "Turbine ± 1,800 kWh/year + 5 kWh buffering",
+    specs: ["1.5 kW peak", "5 kWh storage", "Island mode", "20 ms switchover"],
+    yield: "Turbine 150–500 kWh/year + 5 kWh buffering",
     mount: "Roof mount + indoor unit (plug & play)",
-    battery: "Integrated 5 kWh LiFePO4 battery, expandable to 15 kWh"
+    battery: "Integrated 5 kWh LiFePO4 battery, expandable to 15 kWh",
+    tech: [
+      "Hybrid inverter: RfG-certified (EN 50549), island mode, 20 ms switchover",
+      "Battery: 5 kWh LiFePO4, expandable to 15 kWh",
+      "CE-marked · EU declaration of conformity and permit pack included"
+    ]
   },
   {
     id: "windhoos-bundle",
@@ -68,10 +108,15 @@ const PRODUCTS = [
     price: 1590,
     oldPrice: 1790,
     desc: "The gateway to independence: two Breeze turbines plus a compact 2.5 kWh battery. Catches wind from every direction, even between houses.",
-    specs: ["2 × 300 W piek", "2.5 kWh storage", "36 dB", "Island mode"],
-    yield: "± 800 kWh/year + 2.5 kWh buffering",
+    specs: ["2 × 300 W peak", "2.5 kWh storage", "36 dB", "Island mode"],
+    yield: "2 × 40–150 kWh/year + 2.5 kWh buffering",
     mount: "Two wall brackets + wall unit",
-    battery: "2.5 kWh LiFePO4, expandable to 10 kWh"
+    battery: "2.5 kWh LiFePO4, expandable to 10 kWh",
+    tech: [
+      "Hybrid inverter: RfG-certified (EN 50549), island mode",
+      "Battery: 2.5 kWh LiFePO4, expandable to 10 kWh",
+      "CE-marked · EU declaration of conformity and permit pack included"
+    ]
   }
 ];
 
