@@ -522,3 +522,26 @@ details[open] { border-color: var(--accent); }
   transition: opacity .25s ease, bottom .25s ease;
 }
 .toast.show { opacity: 1; bottom: 2.2rem; }
+
+
+/* ---------- Realistic imagery (added) ---------- */
+.product-art { position: relative; }
+.hero-photo {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+}
+.product-photo { display: none; }
+.product-art.has-photo .product-photo {
+  display: block; position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+}
+.product-art.has-photo .turbine { display: none; }
+.m-photo { display: none; }
+.m-art.has-photo .m-photo {
+  display: block; width: 100%; height: 100%;
+  object-fit: cover; border-radius: 12px;
+}
+.m-art.has-photo .turbine { display: none; }

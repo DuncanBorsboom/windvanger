@@ -29,6 +29,14 @@
         li.textContent = s;
         ul.appendChild(li);
       });
+      if (p.img) {
+        const art = node.querySelector(".product-art");
+        const ph = node.querySelector(".product-photo");
+        ph.addEventListener("error", () => { art.classList.remove("has-photo"); });
+        ph.src = p.img;
+        ph.alt = p.name + " — vertical wind turbine";
+        art.classList.add("has-photo");
+      }
       if (p.priceWithout) {
         const li = document.createElement("li");
         li.textContent = "with / without controller";
@@ -191,6 +199,16 @@
     modalBody.querySelector(".m-tag").textContent = p.tag;
     modalBody.querySelector("h3").textContent = p.name;
     modalBody.querySelector(".m-desc").textContent = p.desc;
+    if (p.img) {
+      const art = modalBody.querySelector(".m-art");
+      const ph = document.createElement("img");
+      ph.className = "m-photo";
+      ph.alt = p.name + " — vertical wind turbine";
+      ph.addEventListener("error", () => { art.classList.remove("has-photo"); ph.remove(); });
+      ph.src = p.img;
+      art.classList.add("has-photo");
+      art.appendChild(ph);
+    }
     const ul = modalBody.querySelector(".m-specs");
     const rows = [
       ["Yield", p.yield],
