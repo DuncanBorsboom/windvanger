@@ -40,6 +40,15 @@
       } else {
         priceEl.textContent = fmt(p.price);
       }
+      if (p.image) {
+        const art = node.querySelector(".product-art");
+        art.innerHTML = "";
+        const img = document.createElement("img");
+        img.src = p.image;
+        img.alt = p.name;
+        img.loading = "lazy";
+        art.appendChild(img);
+      }
       node.querySelector(".add").addEventListener("click", () => Cart.add(p.id));
       node.querySelector(".link-more").addEventListener("click", () => openModal(p.id));
       grid.appendChild(node);
@@ -172,10 +181,14 @@
 
   function openModal(id) {
     const p = byId(id);
+    let artHtml = '<div class="m-art"><div class="turbine"><div class="pole"></div>' +
+      '<div class="rotor"><div class="blade b1"></div><div class="blade b2"></div><div class="blade b3"></div></div></div></div>';
+    if (p.image) {
+      artHtml = '<div class="m-art"><img src="' + p.image + '" alt="' + p.name + '" loading="lazy"></div>';
+    }
     modalBody.innerHTML =
       '<span class="m-tag"></span><h3></h3>' +
-      '<div class="m-art"><div class="turbine"><div class="pole"></div>' +
-      '<div class="rotor"><div class="blade b1"></div><div class="blade b2"></div><div class="blade b3"></div></div></div></div>' +
+      artHtml +
       '<p class="m-desc"></p><ul class="m-specs"></ul>' +
       '<div class="m-foot"><span class="m-price"></span><button class="btn btn-primary">In winkelwagen</button></div>';
     modalBody.querySelector(".m-tag").textContent = p.tag;

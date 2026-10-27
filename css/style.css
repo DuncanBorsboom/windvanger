@@ -522,3 +522,7 @@ details[open] { border-color: var(--accent); }
   transition: opacity .25s ease, bottom .25s ease;
 }
 .toast.show { opacity: 1; bottom: 2.2rem; }
+
+.product-art img { width: 100%; height: 100%; object-fit: cover; }
+
+.m-art img { width: 100%; height: auto; max-height: 300px; object-fit: contain; }
