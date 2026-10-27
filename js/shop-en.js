@@ -6,7 +6,8 @@
   const filters = document.querySelectorAll(".chip");
   const state = { filter: "all" };
 
-  const fmt = (n) => "€ " + n.toLocaleString("nl-NL");
+  const fmt = (n) => "€ " + n.toLocaleString("en-GB");
+  const priceFor = (p, variant) => (variant === "without" && p.priceWithout) ? p.priceWithout : p.price;
   const byId = (id) => PRODUCTS.find((p) => p.id === id);
 
   function matches(p, f) {
@@ -28,6 +29,19 @@
         li.textContent = s;
         ul.appendChild(li);
       });
+      if (p.img) {
+        const art = node.querySelector(".product-art");
+        const ph = node.querySelector(".product-photo");
+        ph.addEventListener("error", () => { art.classList.remove("has-photo"); });
+        ph.src = p.img;
+        ph.alt = p.name + " — vertical wind turbine";
+        art.classList.add("has-photo");
+      }
+      if (p.priceWithout) {
+        const li = document.createElement("li");
+        li.textContent = "with / without controller";
+        ul.appendChild(li);
+      }
       const priceEl = node.querySelector(".product-price");
       if (p.oldPrice) {
         priceEl.innerHTML = "";
@@ -62,6 +76,7 @@
     try {
       items = JSON.parse(localStorage.getItem(KEY) || "[]");
     } catch (e) { items = []; }
+    items.forEach((it) => { if (!it.variant) it.variant = "with"; });
 
     const el = {
       panel: document.getElementById("cart"),
@@ -81,7 +96,7 @@
     }
 
     function total() {
-      return items.reduce((sum, it) => sum + byId(it.id).price * it.qty, 0);
+      return items.reduce((sum, it) => sum + priceFor(byId(it.id), it.variant) * it.qty, 0);
     }
 
     function render() {
@@ -99,27 +114,27 @@
           '<div class="qty"><button type="button" aria-label="Less">−</button><span></span><button type="button" aria-label="More">+</button></div>' +
           '<div class="ci-price"></div>' +
           '<button type="button" class="ci-remove" aria-label="Remove">✕</button>';
-        li.querySelector(".ci-name").textContent = p.name;
+        li.querySelector(".ci-name").textContent = p.name + (it.variant === "without" ? " — without controller" : "");
         li.querySelector(".qty span").textContent = it.qty;
         li.querySelector(".ci-price").textContent = fmt(p.price * it.qty);
         const [minus, plus] = li.querySelectorAll(".qty button");
-        minus.addEventListener("click", () => change(it.id, -1));
-        plus.addEventListener("click", () => change(it.id, 1));
-        li.querySelector(".ci-remove").addEventListener("click", () => remove(it.id));
+        minus.addEventListener("click", () => change(it.id, it.variant, -1));
+        plus.addEventListener("click", () => change(it.id, it.variant, 1));
+        li.querySelector(".ci-remove").addEventListener("click", () => remove(it.id, it.variant));
         el.list.appendChild(li);
       });
     }
 
-    function change(id, delta) {
-      const it = items.find((i) => i.id === id);
+    function change(id, variant, delta) {
+      const it = items.find((i) => i.id === id && i.variant === variant);
       if (!it) return;
       it.qty += delta;
-      if (it.qty <= 0) items = items.filter((i) => i.id !== id);
+      if (it.qty <= 0) remove(id, variant);
       save(); render();
     }
 
-    function remove(id) {
-      items = items.filter((i) => i.id !== id);
+    function remove(id, variant) {
+      items = items.filter((i) => !(i.id === id && i.variant === variant));
       save(); render();
     }
 
@@ -157,11 +172,12 @@
 
     render();
 
-    return { add: (id) => {
-      const it = items.find((i) => i.id === id);
-      if (it) it.qty += 1; else items.push({ id, qty: 1 });
+    return { add: (id, variant) => {
+      variant = variant || "with";
+      const it = items.find((i) => i.id === id && i.variant === variant);
+      if (it) it.qty += 1; else items.push({ id: id, qty: 1, variant: variant });
       save(); render();
-      toast(byId(id).name + " added ✓");
+      toast(byId(id).name + (variant === "without" ? " (without controller)" : "") + " added ✓");
     }};
   })();
 
@@ -172,31 +188,76 @@
 
   function openModal(id) {
     const p = byId(id);
+    let variant = "with";
     modalBody.innerHTML =
       '<span class="m-tag"></span><h3></h3>' +
       '<div class="m-art"><div class="turbine"><div class="pole"></div>' +
       '<div class="rotor"><div class="blade b1"></div><div class="blade b2"></div><div class="blade b3"></div></div></div></div>' +
       '<p class="m-desc"></p><ul class="m-specs"></ul>' +
-      '<div class="m-foot"><span class="m-price"></span><button class="btn btn-primary">In winkelwagen</button></div>';
+      '<div class="m-ctrl"></div>' +
+      '<div class="m-foot"><span class="m-price"></span><button class="btn btn-primary">Add to cart</button></div>';
     modalBody.querySelector(".m-tag").textContent = p.tag;
     modalBody.querySelector("h3").textContent = p.name;
     modalBody.querySelector(".m-desc").textContent = p.desc;
+    if (p.img) {
+      const art = modalBody.querySelector(".m-art");
+      const ph = document.createElement("img");
+      ph.className = "m-photo";
+      ph.alt = p.name + " — vertical wind turbine";
+      ph.addEventListener("error", () => { art.classList.remove("has-photo"); ph.remove(); });
+      ph.src = p.img;
+      art.classList.add("has-photo");
+      art.appendChild(ph);
+    }
     const ul = modalBody.querySelector(".m-specs");
-    [
+    const rows = [
       ["Yield", p.yield],
       ["Mounting", p.mount],
       ["Battery", p.battery],
       ["Specs", p.specs.join(" · ")]
-    ].forEach(([k, v]) => {
+    ];
+    if (p.controller) rows.push(["Controller", p.controller]);
+    (p.tech || []).forEach((t) => rows.push(["Tech", t]));
+    rows.forEach(([k, v]) => {
       const li = document.createElement("li");
       li.innerHTML = "<strong></strong>";
       li.querySelector("strong").textContent = k.toUpperCase();
       li.appendChild(document.createTextNode(v));
       ul.appendChild(li);
     });
-    modalBody.querySelector(".m-price").textContent = fmt(p.price);
+    const priceEl = modalBody.querySelector(".m-price");
+    const setPrice = () => { priceEl.textContent = fmt(priceFor(p, variant)); };
+    const ctrlBox = modalBody.querySelector(".m-ctrl");
+    if (p.priceWithout) {
+      const chips = document.createElement("div");
+      chips.className = "filters";
+      chips.setAttribute("role", "tablist");
+      chips.setAttribute("aria-label", "Controller option");
+      const mk = (label, val) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "chip" + (val === variant ? " active" : "");
+        b.textContent = label;
+        b.addEventListener("click", () => {
+          variant = val;
+          chips.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+          b.classList.add("active");
+          setPrice();
+        });
+        chips.appendChild(b);
+      };
+      mk("With MPPT controller (+" + fmt(p.price - p.priceWithout) + ")", "with");
+      mk("Without controller — I already have an inverter", "without");
+      const note = document.createElement("p");
+      note.style.margin = ".5rem 0 0";
+      note.style.color = "var(--muted)";
+      note.style.fontSize = ".75rem";
+      note.textContent = "The controller is CE-marked and charges your battery safely. Grid feed-in requires an RfG-certified inverter (EN 50549) and registration with your grid operator.";
+      ctrlBox.append(chips, note);
+    }
+    setPrice();
     modalBody.querySelector(".btn").addEventListener("click", () => {
-      Cart.add(p.id);
+      Cart.add(p.id, variant);
       closeModal();
     });
     modal.hidden = false;
@@ -221,13 +282,14 @@
     const results = document.getElementById("calc-results");
     if (!solarEl || !chart) return;
 
-    /* Gemiddelde NL-data per maand (index 0 = jan):
-       zonUren = volle-zon-uren per dag; opbrengst panelen ≈ wp * zonUren * dagen * 0.75 (systeemrendement)
-       windCF = capaciteitsfactor kleine VAWT in NL; opbrengst turbine ≈ watt * 24 * dagen * CF */
+    /* Average NL data per month (index 0 = Jan):
+       zonUren = full-sun hours per day; panel yield ≈ wp * sunHours * days * 0.75 (system efficiency)
+       windCF = realistic capacity factor of a small VAWT in NL (research-based, ±3–5% annual average);
+       turbine yield ≈ watt * 24 * days * CF */
     const MAANDEN = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
     const DAGEN = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     const ZONUREN = [1.3, 2.4, 3.9, 5.4, 6.6, 6.9, 6.6, 5.9, 4.5, 2.9, 1.6, 1.1];
-    const WINDCF = [0.34, 0.32, 0.28, 0.23, 0.20, 0.17, 0.16, 0.16, 0.19, 0.24, 0.29, 0.35];
+    const WINDCF = [0.052, 0.049, 0.043, 0.036, 0.031, 0.027, 0.025, 0.025, 0.029, 0.038, 0.046, 0.054];
 
     /* Gemeten NL-data 2025 (KNMI, benadering): gemiddelde zonuren per dag
        en % winddagen (dagen met voldoende wind, >= 5 m/s) per maand */
@@ -321,7 +383,7 @@
           [Math.round(totZon) + " kWh", "solar yield " + panelen + " panels per year"],
           [Math.round(winterWind) + " kWh", "wind in winter (Nov–Feb)"],
           [Math.round(winterZon) + " kWh", "solar in winter (Nov–Feb) — compare!"],
-          [terugverdient > 0 ? Math.round(terugverdient) + " yrs" : "—", "payback time ≈ € " + investering.toLocaleString("en-GB") + " investment"]
+          [terugverdient > 0 ? (terugverdient > 25 ? "25+ yrs" : Math.round(terugverdient) + " yrs") : "—", "payback at current power prices ≈ € " + investering.toLocaleString("en-GB") + " investment"]
         ];
       }
       kaarten.forEach(([v, l]) => {
