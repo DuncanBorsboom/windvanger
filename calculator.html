@@ -10,47 +10,60 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .calc-panel { max-width: 1000px; margin: 0 auto; }
-    .calc-inputs { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
-    .calc-field { display: flex; flex-direction: column; gap: .4rem; font-size: .85rem; font-weight: 600; min-width: 0; }
+    /* Breder ontwerp voor betere ruimtebenutting */
+    .calc-section { padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 4vw, 3rem); max-width: 1400px; margin: 0 auto; }
+    .calc-panel { max-width: 100%; margin: 0 auto; }
+    .calc-inputs { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .calc-field { display: flex; flex-direction: column; gap: .3rem; font-size: .85rem; font-weight: 600; min-width: 0; }
     .calc-field input, .calc-field select { width: 100%; }
     .calc-field input[type="range"] { accent-color: var(--accent); }
     .calc-field select, .calc-field input[type="number"] { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: .5rem .8rem; font: 600 .9rem var(--font-head); }
     .calc-field input:focus, .calc-field select:focus { outline: none; border-color: var(--accent); }
-    .calc-field output { color: var(--accent-2); font-size: .8rem; }
+    .calc-field output { color: var(--accent-2); font-size: .75rem; }
     
-    .calc-results { margin-top: 2rem; }
-    .calc-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-    .calc-result-card { background: var(--ink-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.2rem; text-align: center; }
+    /* Resultaten in een rij */
+    .calc-results { margin-top: 1.5rem; }
+    .calc-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .8rem; margin-bottom: 1rem; }
+    .calc-result-card { background: var(--ink-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem; text-align: center; min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
     .calc-result-card.calc-result-highlight { background: linear-gradient(160deg, #fff6d8, var(--ink-2)); border-color: var(--accent); }
-    .calc-result-label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: .4rem; }
-    .calc-result-value { display: block; font-size: 1.5rem; font-weight: 800; color: var(--text); }
+    .calc-result-label { display: block; font-size: .75rem; color: var(--muted); margin-bottom: .2rem; }
+    .calc-result-value { display: block; font-size: 1.3rem; font-weight: 800; color: var(--text); line-height: 1.2; }
     .calc-result-card.calc-result-highlight .calc-result-value { color: var(--accent); }
     .calc-result-card.calc-result-highlight .calc-result-label { color: var(--accent); opacity: .8; }
-    .calc-result-card.calc-result-warning .calc-result-value { color: #e8946a; }
     
-    .calc-chart { display: flex; gap: .4rem; height: 200px; align-items: flex-end; margin-top: 1.5rem; }
-    .calc-bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .4rem; height: 100%; }
+    /* Compacte grafiek */
+    .calc-chart { display: flex; gap: .3rem; height: 160px; align-items: flex-end; margin: 1.5rem 0; }
+    .calc-bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .3rem; height: 100%; min-width: 40px; }
     .bar-stack { width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
-    .bar-solar { width: 60%; background: linear-gradient(to top, #ffd447, #ffb800); border-radius: 4px 4px 0 0; position: absolute; bottom: 0; }
-    .bar-wind { width: 60%; background: linear-gradient(to top, #5b8dd6, #3a6bc7); border-radius: 4px 4px 0 0; position: absolute; bottom: 0; }
-    .bar-battery { width: 60%; background: linear-gradient(to top, #0aa08c, #008877); border-radius: 4px 4px 0 0; position: relative; }
-    .bar-month { font-family: var(--font-mono); font-size: .65rem; color: var(--muted); }
-    .bar-value { font-family: var(--font-mono); font-size: .7rem; color: var(--text); position: absolute; top: -1.4rem; }
-    .consumption-line { position: absolute; width: 60%; height: 1px; background: var(--muted); border-top: 1px dashed var(--muted); left: 0; }
+    .bar-solar { width: 70%; background: linear-gradient(to top, #ffd447, #ffb800); border-radius: 4px 4px 0 0; position: absolute; bottom: 0; }
+    .bar-wind { width: 70%; background: linear-gradient(to top, #5b8dd6, #3a6bc7); border-radius: 4px 4px 0 0; position: absolute; bottom: 0; }
+    .bar-month { font-family: var(--font-mono); font-size: .6rem; color: var(--muted); }
+    .consumption-line { position: absolute; width: 70%; height: 1px; background: var(--muted); border-top: 1px dashed var(--muted); left: 0; }
     
-    .scenario-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-top: 1.5rem; }
-    .scenario-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.2rem; }
-    .scenario-card h4 { font-size: .9rem; margin-bottom: .8rem; color: var(--text); }
-    .scenario-result { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-    .scenario-result span { font-family: var(--font-mono); font-size: .85rem; }
+    /* Scenario's in een rij */
+    .scenario-grid { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-top: 1rem; }
+    .scenario-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem; }
+    .scenario-card h4 { font-size: .85rem; margin-bottom: .5rem; color: var(--text); }
+    .scenario-result { display: flex; justify-content: space-between; gap: .8rem; flex-wrap: wrap; }
+    .scenario-result span { font-family: var(--font-mono); font-size: .8rem; }
     .scenario-result .label { color: var(--muted); }
     .scenario-result .value { color: var(--text); font-weight: 600; }
     
-    .toggle-advanced { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: .5rem 1rem; font: 600 .85rem var(--font-head); cursor: pointer; display: inline-flex; align-items: center; gap: .5rem; }
+    /* Geavanceerde opties */
+    .toggle-advanced { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: .5rem 1rem; font: 600 .85rem var(--font-head); cursor: pointer; display: inline-flex; align-items: center; gap: .5rem; margin-top: 1rem; }
     .toggle-advanced:hover { border-color: var(--accent); }
-    .advanced-options { display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+    .advanced-options { display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
     .advanced-options.show { display: block; }
+    
+    /* Pagina titels */
+    .page-header { text-align: center; margin-bottom: 1.5rem; }
+    .page-header h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: .5rem; }
+    .page-header p { color: var(--muted); max-width: 600px; margin: 0 auto; }
+    
+    /* Terug link */
+    .back-link { display: inline-block; margin-bottom: 1rem; color: var(--accent-2); text-decoration: none; font: 600 .85rem var(--font-head); }
+    .back-link:hover { color: var(--accent); }
+  </style>
   </style>
 </head>
 <body>
@@ -65,15 +78,21 @@
       <span>WIND<span class="accent">VANGER</span></span>
     </a>
     <nav class="main-nav" aria-label="Hoofdmenu">
-      <a href="index.html">Terug naar site</a>
+      <a href="index.html#shop">Turbines</a>
+      <a href="index.html">Home</a>
+      <a href="#batterij">Thuisbatterij</a>
+      <a href="#grid">Grid-onafhankelijk</a>
+      <a href="#faq">Vragen</a>
     </nav>
+    <a class="lang-btn" href="index-en.html" hreflang="en">EN</a>
   </header>
 
   <main id="top">
-    <section class="calc" id="rektool">
+    <section class="calc-section">
+      <div class="page-header">
       <div class="section-head">
         <h2>Energie Rekentool</h2>
-        <p>Bereken hoeveel wind- en zonne-energie jij kunt opwekken. Met inachtneming van je thuisbatterij, elektrische auto en energieverbruik.</p>
+        <p>Bereken hoeveel wind- en zonne-energie jij kunt opwekken. Met inachtneming van je thuisbatterij, elektrische auto en energieverbruik. Zo zie je welke combinatie het beste bij jouw situatie past.</p>
       </div>
       
       <div class="calc-panel">
@@ -254,12 +273,12 @@
           * Gebaseerd op gemiddelde Nederlandse zon- en winddata. Werkelijke resultaten kunnen vari\u0000e9ren afhankelijk van locatie, weersomstandigheden en installatiedetails.
         </p>
       </div>
-    </section>
+      </section>
   </main>
 
   <footer class="site-footer">
     <p class="mono">WINDVANGER — Thuiswind sinds 2025 · KvK 0000000000 (demo)</p>
-    <p>Prototype rekentool. Resultaten zijn indicatief.</p>
+    <p>Prototype webshop. Producten, prijzen en opbrengsten zijn indicatief.</p>
   </footer>
 
   <script src="js/data.js"></script>
