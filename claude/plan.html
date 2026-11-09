@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Energieplan — Windvanger</title>
+  <meta name="description" content="Bereken uur voor uur welke combinatie van windturbine, zonnepanelen, thuisbatterij en elektrische auto past bij het verbruik van jouw gezin, met echte weerdata van jouw adres.">
+  <meta name="theme-color" content="#0f1b24">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f1b24'/%3E%3Cpath d='M16 5v22M10 8c4 3 8 5 12 8M10 16c4 3 8 5 12 8' stroke='%2346d9c8' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/plan.css">
+  <script type="module" src="js/plan.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Naar inhoud</a>
+
+  <header class="site-header">
+    <a class="logo" href="index.html" aria-label="Windvanger, naar de winkel">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="currentColor"/><path d="M16 5v22M10 8c4 3 8 5 12 8M10 16c4 3 8 5 12 8" stroke="var(--wind)" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>
+      Windvanger
+    </a>
+    <nav class="nav" aria-label="Hoofdmenu">
+      <a href="index.html#turbines">Turbines</a>
+      <a href="plan.html" aria-current="page">Energieplan</a>
+      <a href="index.html#faq">Vragen</a>
+    </nav>
+    <a class="cart-btn" href="index.html#winkelwagen">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12L6 6z"/><path d="M6 6L5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+      <span class="sr-only">Winkelwagen,</span>
+      <span class="cart-count" id="cart-count">0</span>
+    </a>
+  </header>
+
+  <main id="main" class="plan">
+    <section class="plan-intro">
+      <p class="eyebrow">Energieplan · uur voor uur, een heel jaar</p>
+      <h1>Kun je een week zonder zon <em>op eigen stroom draaien?</em></h1>
+      <p class="lead">Vul je huishouden in. We rekenen alle 8.760 uren van 2025 door met de gemeten wind, zon en temperatuur op jouw adres. Je ziet welke combinatie van turbines en batterij je verbruik het best dekt, ook op de donkerste dagen.</p>
+    </section>
+
+    <div class="plan-grid">
+      <!-- INVOER -->
+      <form class="plan-form" id="plan-form" autocomplete="on">
+        <fieldset>
+          <legend><span class="step">1</span> Je adres</legend>
+          <label class="field">
+            <span>Postcode</span>
+            <span class="input-row">
+              <input id="pc" name="postal-code" autocomplete="postal-code" placeholder="1234 AB" pattern="\s*[1-9][0-9]{3}\s?[A-Za-z]{2}\s*">
+              <button class="btn btn-dark" type="button" id="pc-btn">Ophalen</button>
+            </span>
+          </label>
+          <p class="status" id="pc-status" aria-live="polite">Weerdata laden…</p>
+          <div class="field">
+            <span>Woning</span>
+            <div class="choices compact">
+              <label><input type="radio" name="home" value="appartement"><span>Appartement</span></label>
+              <label><input type="radio" name="home" value="rijtjeshuis" checked><span>Rijtjeshuis</span></label>
+              <label><input type="radio" name="home" value="vrijstaand"><span>Vrijstaand</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="step">2</span> Je verbruik</legend>
+          <label class="field">
+            <span>Personen in huis <output id="persons-out">3</output></span>
+            <input type="range" id="persons" min="1" max="6" value="3">
+          </label>
+          <label class="field">
+            <span>Jaarverbruik huishouden (kWh)</span>
+            <input type="number" id="annual" min="500" max="15000" step="10" inputmode="numeric">
+            <small class="help">Ingevuld op basis van het aantal personen. Staat het op je energierekening? Vul dat getal in, zonder warmtepomp en auto.</small>
+          </label>
+          <div class="field">
+            <span>Verwarming</span>
+            <div class="choices compact">
+              <label><input type="radio" name="heat" value="gas" checked><span>Gas</span></label>
+              <label><input type="radio" name="heat" value="hybride"><span>Hybride warmtepomp</span></label>
+              <label><input type="radio" name="heat" value="wp"><span>Volledige warmtepomp</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="step">3</span> Wat je al hebt</legend>
+          <label class="field">
+            <span>Zonnepanelen <output id="panels-out">10</output></span>
+            <input type="range" id="panels" min="0" max="30" value="10">
+          </label>
+          <label class="field">
+            <span>Bestaande thuisbatterij <output id="batex-out">geen</output></span>
+            <input type="range" id="batex" min="0" max="20" step="1" value="0">
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="step">4</span> Elektrische auto</legend>
+          <label class="switch"><input type="checkbox" id="ev-on" checked><span>Ik heb (straks) een elektrische auto</span></label>
+          <div class="ev-fields" id="ev-fields">
+            <label class="field">
+              <span>Kilometers per jaar <output id="evkm-out">12.000</output></span>
+              <input type="range" id="evkm" min="3000" max="35000" step="1000" value="12000">
+            </label>
+            <div class="field">
+              <span>Waar is de auto overdag?</span>
+              <div class="choices compact">
+                <label><input type="radio" name="evpat" value="werk" checked><span>Werkdagen weg</span></label>
+                <label><input type="radio" name="evpat" value="thuis"><span>Meestal thuis</span></label>
+              </div>
+            </div>
+            <label class="switch"><input type="checkbox" id="v2h"><span>Auto kan stroom terugleveren aan het huis (bidirectioneel laden)</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="step">5</span> Prijzen en budget</legend>
+          <label class="field">
+            <span>Stroomprijs <output id="price-out">€ 0,30</output> per kWh</span>
+            <input type="range" id="price" min="0.15" max="0.50" step="0.01" value="0.30">
+          </label>
+          <label class="field">
+            <span>Terugleververgoeding <output id="feedin-out">€ 0,05</output> per kWh</span>
+            <input type="range" id="feedin" min="-0.05" max="0.15" step="0.01" value="0.05">
+            <small class="help">Vanaf 2027 zonder saldering. Negatief als je leverancier terugleverkosten rekent.</small>
+          </label>
+          <label class="field">
+            <span>Maximaal budget <output id="budget-out">€ 6.000</output></span>
+            <input type="range" id="budget" min="1000" max="10000" step="250" value="6000">
+          </label>
+        </fieldset>
+      </form>
+
+      <!-- UITKOMST -->
+      <div class="plan-out" aria-live="polite">
+        <section class="panel" aria-labelledby="need-title">
+          <h2 id="need-title">Wat je gezin per jaar nodig heeft</h2>
+          <div class="need-bar" id="need-bar"></div>
+          <p class="need-text" id="need-text"></p>
+        </section>
+
+        <section aria-labelledby="pk-title">
+          <h2 id="pk-title" class="sub">Onze drie adviezen</h2>
+          <div class="packages" id="packages" role="radiogroup" aria-label="Kies een pakket"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="det-title">
+          <div class="det-head">
+            <div>
+              <p class="eyebrow" id="det-eyebrow">Gekozen pakket</p>
+              <h2 id="det-title">–</h2>
+            </div>
+            <button class="btn btn-primary" id="det-buy">Alles in winkelwagen</button>
+          </div>
+          <div class="kpis" id="det-kpis"></div>
+
+          <h3 class="chart-title">Waar je stroom vandaan komt, per maand</h3>
+          <div class="chart-wrap" id="month-chart"></div>
+          <div class="legend src-legend" id="legend"></div>
+
+          <h3 class="chart-title">Blader door het jaar, uur voor uur</h3>
+          <div class="day-tools">
+            <button class="chip" data-jump="dark">Donkerste winterdag</button>
+            <button class="chip" data-jump="calm">Windstil en grijs</button>
+            <button class="chip" data-jump="storm">Stormdag</button>
+            <button class="chip" data-jump="summer">Zomerdag</button>
+          </div>
+          <label class="field day-slider">
+            <span id="day-label">–</span>
+            <input type="range" id="day" min="0" max="364" value="0" aria-describedby="day-text">
+          </label>
+          <div class="chart-wrap" id="day-chart"></div>
+          <p class="day-text" id="day-text"></p>
+        </section>
+
+        <details class="panel method">
+          <summary>Hoe rekenen we dit uit?</summary>
+          <ul>
+            <li><b>Weer:</b> gemeten wind (10 m), zoninstraling en temperatuur per uur in 2025 voor jouw postcode (Open-Meteo, ERA5-heranalyse). Locatie via PDOK.</li>
+            <li><b>Wind:</b> windsnelheid omgerekend naar montagehoogte, vermogenscurve per turbine (start- en nominale windsnelheid), gemiddeld over vlagen binnen het uur.</li>
+            <li><b>Zon:</b> 410 Wp per paneel, schuine opstelling, 80% systeemrendement.</li>
+            <li><b>Huishouden:</b> gemiddeld verbruik per gezinsgrootte met een ochtend- en avondpiek en meer verbruik in de winter.</li>
+            <li><b>Warmtepomp:</b> warmtevraag stijgt als het kouder is dan 16 °C, rendement daalt bij vorst.</li>
+            <li><b>Auto:</b> 0,18 kWh per km, 60 kWh accu. Laden met overschot als de auto thuis is, anders 's nachts van het net. Bidirectioneel laden houdt altijd een reserve voor de volgende rit.</li>
+            <li><b>Batterij:</b> 90% bruikbaar, 90% rendement heen en terug. Overschot gaat eerst naar de auto, dan de batterij, dan het net.</li>
+            <li><b>Besparing:</b> verschil met je huidige situatie (zelfde panelen, batterij en auto, zonder het pakket). Bebouwing en bomen vlak bij je huis kunnen de windopbrengst verlagen; dat checken we gratis vóór installatie.</li>
+          </ul>
+        </details>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div><strong>Windvanger</strong> — thuiswind sinds 2025<p>Prototype. Uitkomsten zijn een indicatie, geen garantie.</p></div>
+    <a href="index.html">← Terug naar de winkel</a>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

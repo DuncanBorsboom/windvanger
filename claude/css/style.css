@@ -354,3 +354,7 @@ dialog::backdrop { background: rgb(10 18 24 / .45); backdrop-filter: blur(3px); 
 
 /* View transitions bij filteren */
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .25s; }
+
+/* Doorverwijzing naar het energieplan */
+.plan-cta { display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 16px; padding: 16px 18px; border-radius: 16px; background: color-mix(in srgb, var(--wind) 14%, var(--paper)); text-decoration: none; color: var(--ink); font-size: .92rem; }
+.plan-cta > span:first-child { flex: 1 1 280px; }

@@ -1,38 +1,9 @@
 import { PRODUCTS, ADDONS, CATEGORIES, MONTHS, DAYS, FALLBACK_CLIMATE, SALDERING_END, REVIEWS } from "./data.js";
+import { $, $$, eur, store, powerFraction, curve, heightFactor, normalizePostcode, validPostcode, geocode } from "./shared.js";
 
-const $ = (sel, root = document) => root.querySelector(sel);
-const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
-const eur = (n, dec = 0) => "€ " + n.toLocaleString("nl-NL", { minimumFractionDigits: dec, maximumFractionDigits: dec });
 const byId = id => PRODUCTS.find(p => p.id === id) || ADDONS.find(a => a.id === id);
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const store = {
-  get(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } },
-  set(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch { /* privémodus: alleen in geheugen */ } }
-};
-
-/* ---------- Windmodel ---------- */
-// Vermogensfractie bij Rayleigh-verdeelde wind met gemiddelde v (m/s). Nominaal bij 12 m/s, stormstop bij 25 m/s.
-const fracCache = new Map();
-function powerFraction(v, cutIn, rated = 12, cutOut = 25) {
-  const key = v.toFixed(2) + "|" + cutIn;
-  if (fracCache.has(key)) return fracCache.get(key);
-  const s = Math.max(v, 0.1) / Math.sqrt(Math.PI / 2);
-  let e = 0;
-  for (let x = 0.05; x < 30; x += 0.1) {
-    const pdf = (x / (s * s)) * Math.exp(-(x * x) / (2 * s * s));
-    e += curve(x, cutIn, rated, cutOut) * pdf * 0.1;
-  }
-  fracCache.set(key, e);
-  return e;
-}
-function curve(x, cutIn, rated = 12, cutOut = 25) {
-  if (x < cutIn || x >= cutOut) return 0;
-  if (x >= rated) return 1;
-  return (x ** 3 - cutIn ** 3) / (rated ** 3 - cutIn ** 3);
-}
-// Logaritmisch windprofiel: meetwaarde op 10 m omrekenen naar montagehoogte (ruwheid voorstedelijk).
-const heightFactor = h => Math.log(h / 0.3) / Math.log(10 / 0.3);
 const refYield = p => Math.round((p.watt / 1000) * 8760 * powerFraction(5 * heightFactor(p.mountHeight), p.cutIn));
 
 /* ---------- Turbine-illustratie (3D-helix in SVG) ---------- */
@@ -211,6 +182,7 @@ function initCart() {
   });
   $("#checkout-btn").addEventListener("click", () => { drawer.close(); $("#checkout").showModal(); });
   renderCart();
+  if (location.hash === "#winkelwagen") open();
 }
 
 /* ---------- Productkaarten ---------- */
@@ -376,7 +348,7 @@ function showRecommendation({ home, goal, battery }) {
       <ul>${reasons.map(r => `<li>${r}</li>`).join("")}</ul>
       <div class="fr-actions">
         <button type="button" class="btn btn-primary" data-buy>In winkelwagen · ${eur(p.price)}</button>
-        <button type="button" class="link-btn" data-calc>Check opbrengst op mijn adres</button>
+        <a class="link-btn" href="plan.html">Reken je hele gezin door →</a>
       </div>
     </div>`;
   $(".fr-art", out).append(productArt(p, { speed: 1.8 }));
@@ -387,18 +359,6 @@ function showRecommendation({ home, goal, battery }) {
 }
 
 /* ---------- Locatie & klimaatdata ---------- */
-const normalizePostcode = s => (s || "").replace(/\s+/g, "").toUpperCase();
-const validPostcode = s => /^[1-9][0-9]{3}[A-Z]{2}$/.test(s);
-
-async function geocode(postcode, number) {
-  const q = number ? `postcode:${postcode} and huisnummer:${number}` : `postcode:${postcode}`;
-  const url = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${encodeURIComponent(q)}&fq=type:${number ? "adres" : "postcode"}&rows=1&fl=centroide_ll,woonplaatsnaam,weergavenaam`;
-  const res = await fetch(url);
-  const doc = (await res.json()).response.docs[0];
-  if (!doc) return null;
-  const [lon, lat] = doc.centroide_ll.match(/[-\d.]+/g).map(Number);
-  return { lat, lon, place: doc.woonplaatsnaam, label: doc.weergavenaam };
-}
 
 async function fetchClimate(lat, lon) {
   const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat.toFixed(3)}&longitude=${lon.toFixed(3)}&start_date=2025-01-01&end_date=2025-12-31&daily=wind_speed_10m_mean,shortwave_radiation_sum&wind_speed_unit=ms&timezone=Europe%2FAmsterdam`;
