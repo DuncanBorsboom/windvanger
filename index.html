@@ -84,31 +84,46 @@
       <div class="product-grid" id="product-grid"></div>
     </section>
 
-    <section class="calc" id="rektool">
+        <section class="calc" id="rektool">
       <div class="section-head">
-        <h2>Wat levert wind op vs. zon?</h2>
-        <p>Vul je situatie in en zie per maand hoeveel kWh een turbine oplevert naast je zonnepanelen — op basis van gemiddelde Nederlandse zon- en winddata.</p>
+        <h2>Wat levert het op voor mij?</h2>
+        <p>Vul je situatie in en zie direct hoeveel een windturbine voor jou oplevert — op basis van je woningtype, huishoudgrootte en verbruik.</p>
       </div>
       <div class="calc-panel">
         <div class="calc-inputs">
           <label class="calc-field">
-            <span>Zonnepanelen</span>
-            <input type="range" id="calc-solar" min="0" max="20" step="1" value="8">
-            <output class="mono" id="calc-solar-out">8 panelen (± 2,9 kWp)</output>
+            <span>Type woning</span>
+            <select id="calc-home-type">
+              <option value="appartement" data-avg="2500">Appartement (~ 2.500 kWh/jaar)</option>
+              <option value="rijtjes" data-avg="3500">Rijtjeshuis (~ 3.500 kWh/jaar)</option>
+              <option value="twee-onder-een-kap" data-avg="4500" selected>Twee-onder-een-kap (~ 4.500 kWh/jaar)</option>
+              <option value="vrijstaand" data-avg="6000">Vrijstaand huis (~ 6.000 kWh/jaar)</option>
+              <option value="custom">Anders (handmatig invoeren)</option>
+            </select>
+          </label>
+          <label class="calc-field" id="calc-people-field">
+            <span>Aantal personen</span>
+            <input type="range" id="calc-people" min="1" max="6" step="1" value="3">
+            <output class="mono" id="calc-people-out">3 personen</output>
+          </label>
+          <label class="calc-field" id="calc-consumption-field" style="display: none;">
+            <span>Jaarverbruik (kWh)</span>
+            <input type="number" id="calc-consumption" min="1000" max="20000" step="100" value="4500">
+            <output class="mono">kWh/jaar</output>
           </label>
           <label class="calc-field">
             <span>Turbine</span>
             <select id="calc-turbine">
-              <option value="150" data-price="549">Havik Mini — 150 W</option>
-              <option value="300" data-price="749" selected>Bries — 300 W</option>
-              <option value="600" data-price="1290">Zephyr — 600 W</option>
-              <option value="1500" data-price="2490">Stormvogel — 1.500 W</option>
+              <option value="150" data-price="549" data-yield="200">Havik Mini — 150 W (~ 200 kWh/jaar)</option>
+              <option value="300" data-price="749" data-yield="400" selected>Bries — 300 W (~ 400 kWh/jaar)</option>
+              <option value="600" data-price="1290" data-yield="900">Zephyr — 600 W (~ 900 kWh/jaar)</option>
+              <option value="1500" data-price="2490" data-yield="1800">Stormvogel — 1.500 W (~ 1.800 kWh/jaar)</option>
             </select>
           </label>
           <label class="calc-field">
             <span>Aantal turbines</span>
-            <input type="range" id="calc-count" min="1" max="6" step="1" value="2">
-            <output class="mono" id="calc-count-out">2 turbines</output>
+            <input type="range" id="calc-count" min="1" max="6" step="1" value="1">
+            <output class="mono" id="calc-count-out">1 turbine</output>
           </label>
           <label class="calc-field">
             <span>Stroomprijs</span>
@@ -116,17 +131,29 @@
             <output class="mono">€/kWh</output>
           </label>
         </div>
-        <div class="calc-modes" role="tablist" aria-label="Weergavemodus grafiek">
-          <button class="calc-mode active" data-mode="setup">Jouw situatie</button>
-          <button class="calc-mode" data-mode="2025">NL 2025 — gemeten zon & wind</button>
+        <div class="calc-results" id="calc-results">
+          <div class="calc-summary">
+            <div class="calc-result-card">
+              <span class="calc-result-label">Jaarlijkse opbrengst</span>
+              <span class="calc-result-value mono" id="result-yield">0 kWh</span>
+            </div>
+            <div class="calc-result-card">
+              <span class="calc-result-label">Dekt van je verbruik</span>
+              <span class="calc-result-value mono" id="result-coverage">0%</span>
+            </div>
+            <div class="calc-result-card">
+              <span class="calc-result-label">Jaarlijkse besparing</span>
+              <span class="calc-result-value mono" id="result-savings">€ 0</span>
+            </div>
+            <div class="calc-result-card calc-result-highlight">
+              <span class="calc-result-label">Terugverdientijd</span>
+              <span class="calc-result-value mono" id="result-payback">0 jaar</span>
+            </div>
+          </div>
         </div>
-        <div class="calc-legend mono"><span><span class="dot dot-solar"></span><span id="legend-zon">zon (panelen)</span></span><span><span class="dot dot-wind"></span><span id="legend-wind">wind (turbine)</span></span></div>
-        <div class="calc-chart" id="calc-chart" role="img" aria-label="Maandgrafiek zon versus wind opbrengst"></div>
-        <div class="calc-results mono" id="calc-results"></div>
+        <div class="calc-chart" id="calc-chart" role="img" aria-label="Maandgrafiek wind opbrengst"></div>
         <p class="calc-note mono">
-          * Vereenvoudiging: de rekentool gaat uit van direct eigen verbruik of opslag in je thuisbatterij.
-          Teruglevering aan het grid valt onder de uitfaserende salderingsregeling en levert straks minder op —
-          een thuisbatterij samen met wind is dus precies hoe je maximaal profiteert.
+          * Gebaseerd op gemiddelde Nederlandse winddata (5-6 m/s). De werkelijke opbrengst hangt af van je locatie, windrichting en obstakels.
         </p>
       </div>
     </section>

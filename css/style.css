@@ -528,3 +528,48 @@ details[open] { border-color: var(--accent); }
 .m-art img { width: 100%; height: auto; max-height: 300px; object-fit: contain; }
 
 .hero-art img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius); }
+
+
+/* Rekentool resultaten */
+.calc-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.calc-result-card {
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  text-align: center;
+}
+
+.calc-result-card.calc-result-highlight {
+  background: linear-gradient(160deg, #fff6d8, var(--ink-2));
+  border-color: var(--accent);
+}
+
+.calc-result-label {
+  display: block;
+  font-size: .8rem;
+  color: var(--muted);
+  margin-bottom: .4rem;
+}
+
+.calc-result-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.calc-result-card.calc-result-highlight .calc-result-value {
+  color: var(--accent);
+}
+
+.calc-result-card.calc-result-highlight .calc-result-label {
+  color: var(--accent);
+  opacity: .8;
+}

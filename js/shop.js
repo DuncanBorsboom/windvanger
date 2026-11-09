@@ -223,150 +223,149 @@
   document.getElementById("modal-close").addEventListener("click", closeModal);
   modalOverlay.addEventListener("click", closeModal);
 
-  /* ---------- Rektool: zon vs wind ---------- */
+  /* ---------- Rektool: consumenten berekening ---------- */
   (function initCalc() {
-    const solarEl = document.getElementById("calc-solar");
-    const solarOut = document.getElementById("calc-solar-out");
+    const homeTypeEl = document.getElementById("calc-home-type");
+    const peopleEl = document.getElementById("calc-people");
+    const peopleOut = document.getElementById("calc-people-out");
+    const consumptionEl = document.getElementById("calc-consumption");
+    const consumptionField = document.getElementById("calc-consumption-field");
     const turbineEl = document.getElementById("calc-turbine");
     const countEl = document.getElementById("calc-count");
     const countOut = document.getElementById("calc-count-out");
     const priceEl = document.getElementById("calc-price");
     const chart = document.getElementById("calc-chart");
     const results = document.getElementById("calc-results");
-    if (!solarEl || !chart) return;
+    
+    if (!homeTypeEl || !turbineEl || !countEl || !priceEl) return;
 
-    /* Gemiddelde NL-data per maand (index 0 = jan):
-       zonUren = volle-zon-uren per dag; opbrengst panelen ≈ wp * zonUren * dagen * 0.75 (systeemrendement)
-       windCF = capaciteitsfactor kleine VAWT in NL; opbrengst turbine ≈ watt * 24 * dagen * CF */
+    // Gemiddeld verbruik per woningtype (kWh/jaar)
+    const HOME_TYPES = {
+      appartement: 2500,
+      rijtjes: 3500,
+      "twee-onder-een-kap": 4500,
+      vrijstaand: 6000
+    };
+
+    // Gemiddelde verbruik per persoon (kWh/jaar)
+    const PERSON_CONSUMPTION = 1000;
+
+    // Turbine data: watt -> jaarlijkse opbrengst in kWh
+    const TURBINE_YIELD = {
+      150: 200,
+      300: 400,
+      600: 900,
+      1500: 1800
+    };
+
+    // Turbine prijzen
+    const TURBINE_PRICES = {
+      150: 549,
+      300: 749,
+      600: 1290,
+      1500: 2490
+    };
+
+    // Maanddata voor grafiek (gemiddelde NL windopbrengst per maand)
     const MAANDEN = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
     const DAGEN = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    const ZONUREN = [1.3, 2.4, 3.9, 5.4, 6.6, 6.9, 6.6, 5.9, 4.5, 2.9, 1.6, 1.1];
     const WINDCF = [0.34, 0.32, 0.28, 0.23, 0.20, 0.17, 0.16, 0.16, 0.19, 0.24, 0.29, 0.35];
 
-    /* Gemeten NL-data 2025 (KNMI, benadering): gemiddelde zonuren per dag
-       en % winddagen (dagen met voldoende wind, >= 5 m/s) per maand */
-    const ZONUREN_2025 = [1.2, 2.6, 4.2, 6.1, 7.3, 6.4, 7.1, 6.0, 4.8, 3.1, 1.7, 0.9];
-    const WINDDAGEN_2025 = [68, 62, 55, 48, 42, 38, 35, 37, 45, 55, 63, 70];
-    let modus = "setup";
+    function calculate() {
+      const homeType = homeTypeEl.value;
+      const people = +peopleEl.value;
+      const turbineWatt = +turbineEl.value;
+      const count = +countEl.value;
+      const price = +priceEl.value || 0.33;
 
-    function is2025() { return modus === "2025"; }
+      // Bereken verbruik
+      let consumption;
+      if (homeType === "custom") {
+        consumption = +consumptionEl.value || 4500;
+      } else {
+        // Basis verbruik op woningtype + extra per persoon
+        const base = HOME_TYPES[homeType] || 4500;
+        consumption = base + (people - 2) * PERSON_CONSUMPTION;
+        if (consumption < 1000) consumption = 1000;
+      }
 
-    function solarKwh(maand, panelen) {
-      const kWp = panelen * 0.365;
-      return kWp * ZONUREN[maand] * DAGEN[maand] * 0.75;
+      // Bereken opbrengst
+      const yieldPerTurbine = TURBINE_YIELD[turbineWatt] || 400;
+      const totalYield = yieldPerTurbine * count;
+      
+      // Bereken coverage
+      const coverage = consumption > 0 ? Math.round((totalYield / consumption) * 100) : 0;
+      
+      // Bereken besparing
+      const savings = totalYield * price;
+      
+      // Bereken terugverdientijd
+      const turbinePrice = TURBINE_PRICES[turbineWatt] || 749;
+      const investment = turbinePrice * count;
+      const payback = savings > 0 ? Math.round(investment / savings * 10) / 10 : 0;
+
+      // Update outputs
+      peopleOut.textContent = people + " " + (people === 1 ? "persoon" : "personen");
+      countOut.textContent = count + " " + (count === 1 ? "turbine" : "turbines");
+
+      // Update results
+      document.getElementById("result-yield").textContent = totalYield.toLocaleString("nl-NL") + " kWh";
+      document.getElementById("result-coverage").textContent = coverage + "%";
+      document.getElementById("result-savings").textContent = "€ " + savings.toLocaleString("nl-NL", {minimumFractionDigits: 0, maximumFractionDigits: 0});
+      document.getElementById("result-payback").textContent = payback.toLocaleString("nl-NL") + " jaar";
+
+      // Render chart
+      renderChart(turbineWatt, count);
     }
 
-    function windKwh(maand, watt) {
-      return (watt / 1000) * 24 * DAGEN[maand] * WINDCF[maand];
-    }
+    function renderChart(turbineWatt, count) {
+      if (!chart) return;
 
-    function render() {
-      const panelen = +solarEl.value;
-      const watt = +turbineEl.value;
-      const prijs = +priceEl.value || 0.33;
-      const aantal = +(countEl ? countEl.value : 1);
-      solarOut.textContent = panelen + " panelen (± " + (panelen * 0.365).toFixed(1).replace(".", ",") + " kWp)";
-      if (countOut) countOut.textContent = aantal + (aantal === 1 ? " turbine" : " turbines");
-
-      const zonnen = is2025()
-        ? ZONUREN_2025.map((z) => (z / 12) * 100)
-        : MAANDEN.map((_, i) => solarKwh(i, panelen));
-      const winden = is2025()
-        ? WINDDAGEN_2025.slice()
-        : MAANDEN.map((_, i) => windKwh(i, watt) * aantal);
-
-      const lz = document.getElementById("legend-zon");
-      const lw = document.getElementById("legend-wind");
-      if (lz) lz.textContent = is2025() ? "zon (% van het daglicht)" : "zon (panelen)";
-      if (lw) lw.textContent = is2025() ? "wind (% van de dagen)" : "wind (turbine)";
-      const max = Math.max(...winden, ...zonnen, 1);
+      const watt = +turbineWatt;
+      const totalWatt = watt * count;
+      const maxKwh = MAANDEN.map((_, i) => (totalWatt / 1000) * 24 * DAGEN[i] * WINDCF[i]);
+      const maxVal = Math.max(...maxKwh, 1);
 
       chart.innerHTML = "";
       MAANDEN.forEach((m, i) => {
+        const kwh = maxKwh[i];
         const col = document.createElement("div");
         col.className = "calc-bar";
-        col.title = is2025()
-          ? m + " 2025: zon " + zonnen[i].toFixed(0) + "% van het daglicht · wind op " + winden[i].toFixed(0) + "% van de dagen"
-          : m + ": zon " + zonnen[i].toFixed(0) + " kWh / wind " + winden[i].toFixed(0) + " kWh";
-        const stack = document.createElement("div");
-        stack.className = "bar-stack";
-        const zs = document.createElement("div");
-        zs.className = "bar-solar";
-        zs.style.height = Math.max(zonnen[i] / max * 100, 1.5) + "%";
-        const ws = document.createElement("div");
-        ws.className = "bar-wind";
-        ws.style.height = Math.max(winden[i] / max * 100, 1.5) + "%";
+        col.title = m + ": " + Math.round(kwh) + " kWh";
+        const bar = document.createElement("div");
+        bar.className = "bar-wind";
+        bar.style.height = Math.max(kwh / maxVal * 100, 2) + "%";
         const lbl = document.createElement("div");
         lbl.className = "bar-month";
         lbl.textContent = m;
-        stack.append(ws, zs);
-        col.append(stack, lbl);
+        col.append(bar, lbl);
         chart.appendChild(col);
       });
-
-      const totZon = zonnen.reduce((a, b) => a + b, 0);
-      const totWind = winden.reduce((a, b) => a + b, 0);
-      const winterWind = winden.slice(10).concat(winden.slice(0, 2)).reduce((a, b) => a + b, 0);
-      const winterZon = zonnen.slice(10).concat(zonnen.slice(0, 2)).reduce((a, b) => a + b, 0);
-      const besparing = (totWind) * prijs;
-      const stukprijs = +(turbineEl.selectedOptions[0].dataset.price || 0);
-      const investering = stukprijs * aantal;
-      const terugverdient = besparing > 0 ? investering / besparing : 0;
-
-      results.innerHTML = "";
-      let kaarten;
-      if (is2025()) {
-        const jaarWindP = WINDDAGEN_2025.reduce((a, b) => a + b, 0) / 12;
-        const jaarZonP = ZONUREN_2025.reduce((a, b) => a + b, 0) / 12 / 12 * 100;
-        const zomerWindP = (WINDDAGEN_2025[4] + WINDDAGEN_2025[5] + WINDDAGEN_2025[6] + WINDDAGEN_2025[7]) / 4;
-        const zomerZonP = (ZONUREN_2025[4] + ZONUREN_2025[5] + ZONUREN_2025[6] + ZONUREN_2025[7]) / 4 / 12 * 100;
-        const winterWindP = (WINDDAGEN_2025[0] + WINDDAGEN_2025[1] + WINDDAGEN_2025[10] + WINDDAGEN_2025[11]) / 4;
-        const winterZonP = (ZONUREN_2025[0] + ZONUREN_2025[1] + ZONUREN_2025[10] + ZONUREN_2025[11]) / 4 / 12 * 100;
-        kaarten = [
-          [Math.round(jaarWindP) + "% · " + Math.round(jaarZonP) + "%", "heel jaar 2025: wind beschikbaar vs zonneschijn"],
-          [Math.round(zomerWindP) + "% · " + Math.round(zomerZonP) + "%", "zomer (mei–aug): hier wint zon net"],
-          [Math.round(winterWindP) + "% · " + Math.round(winterZonP) + "%", "winter (nov–feb): wind wint 5× van zon"],
-          ["24/7", "wind waait ook 's nachts door — zon alleen bij daglicht"],
-          ["—", "schakel terug voor jouw situatie en terugverdientijd"]
-        ];
-      } else {
-        kaarten = [
-          [Math.round(totWind) + " kWh", "windopbrengst " + aantal + "× turbine per jaar ≈ € " + besparingFmt(besparing)],
-          [Math.round(totZon) + " kWh", "zonopbrengst " + panelen + " panelen per jaar"],
-          [Math.round(winterWind) + " kWh", "wind in de winter (nov–feb)"],
-          [Math.round(winterZon) + " kWh", "zon in de winter (nov–feb) — vergelijk!"],
-          [terugverdient > 0 ? Math.round(terugverdient) + " jr" : "—", "terugverdientijd ≈ € " + investering.toLocaleString("nl-NL") + " investering"]
-        ];
-      }
-      kaarten.forEach(([v, l]) => {
-        const stat = document.createElement("div");
-        stat.className = "calc-stat";
-        const strong = document.createElement("strong");
-        strong.textContent = v;
-        const span = document.createElement("span");
-        span.textContent = l;
-        stat.append(strong, span);
-        results.appendChild(stat);
-      });
     }
 
-    function besparingFmt(n) {
-      return n.toLocaleString("nl-NL", { maximumFractionDigits: 0 });
-    }
-
-    document.querySelectorAll(".calc-mode").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".calc-mode").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        modus = btn.dataset.mode;
-        render();
-      });
+    // Event listeners
+    homeTypeEl.addEventListener("change", function() {
+      const isCustom = this.value === "custom";
+      consumptionField.style.display = isCustom ? "flex" : "none";
+      calculate();
     });
 
-    [solarEl, turbineEl, priceEl, countEl].forEach(el => el.addEventListener("input", render));
-    render();
-  })();
+    peopleEl.addEventListener("input", function() {
+      peopleOut.textContent = this.value + " " + (+this.value === 1 ? "persoon" : "personen");
+      calculate();
+    });
 
+    consumptionEl.addEventListener("input", calculate);
+    turbineEl.addEventListener("change", calculate);
+    countEl.addEventListener("input", function() {
+      countOut.textContent = this.value + " " + (+this.value === 1 ? "turbine" : "turbines");
+      calculate();
+    });
+    priceEl.addEventListener("input", calculate);
+
+    // Initial calculate
+    calculate();
+  })();
   /* ---------- Newsletter (demo, geen echte verzending) ---------- */
   const nlForm = document.getElementById("newsletter-form");
   const nlMsg = document.getElementById("newsletter-msg");
