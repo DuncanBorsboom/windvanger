@@ -30,13 +30,14 @@
     .calc-result-card.calc-result-warning .calc-result-value { color: #e8946a; }
     
     .calc-chart { display: flex; gap: .4rem; height: 200px; align-items: flex-end; margin-top: 1.5rem; }
-    .calc-bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .4rem; }
-    .bar-stack { width: 100%; position: relative; display: flex; flex-direction: column; align-items: center; }
-    .bar-solar { width: 60%; background: linear-gradient(to top, #ffd447, #ffb800); border-radius: 4px 4px 0 0; position: relative; }
-    .bar-wind { width: 60%; background: linear-gradient(to top, #5b8dd6, #3a6bc7); border-radius: 4px 4px 0 0; position: relative; }
+    .calc-bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .4rem; height: 100%; }
+    .bar-stack { width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+    .bar-solar { width: 60%; background: linear-gradient(to top, #ffd447, #ffb800); border-radius: 4px 4px 0 0; position: absolute; bottom: 0; }
+    .bar-wind { width: 60%; background: linear-gradient(to top, #5b8dd6, #3a6bc7); border-radius: 4px 4px 0 0; position: absolute; bottom: 0; }
     .bar-battery { width: 60%; background: linear-gradient(to top, #0aa08c, #008877); border-radius: 4px 4px 0 0; position: relative; }
     .bar-month { font-family: var(--font-mono); font-size: .65rem; color: var(--muted); }
     .bar-value { font-family: var(--font-mono); font-size: .7rem; color: var(--text); position: absolute; top: -1.4rem; }
+    .consumption-line { position: absolute; width: 60%; height: 1px; background: var(--muted); border-top: 1px dashed var(--muted); left: 0; }
     
     .scenario-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-top: 1.5rem; }
     .scenario-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.2rem; }
@@ -442,11 +443,11 @@
         const dailyConsumption = (consumption + evAnnual) / 365;
 
         const maxKwh = MAANDEN.map((_, i) => {
-          const solar = solarKwp * ZONUREN[i] * 0.75;
-          const wind = (totalWatt / 1000) * 24 * WINDCF[i];
+          const solar = solarKwp * ZONUREN[i] * 0.75 * DAGEN[i];
+          const wind = (totalWatt / 1000) * 24 * DAGEN[i] * WINDCF[i];
           return solar + wind;
         });
-        const maxVal = Math.max(...maxKwh, dailyConsumption * 1.5, 1);
+        const maxVal = Math.max(...maxKwh, dailyConsumption * DAGEN[0] * 1.5, 1);
 
         chart.innerHTML = "";
         MAANDEN.forEach((m, i) => {
@@ -460,23 +461,21 @@
 
           const stack = document.createElement("div");
           stack.className = "bar-stack";
-          stack.style.height = "200px";
 
           const windBar = document.createElement("div");
           windBar.className = "bar-wind";
-          windBar.style.height = Math.max(wind / maxVal * 100, 1) + "%";
+          const windHeight = Math.max(wind / maxVal * 100, 1);
+          windBar.style.height = windHeight + "%";
 
           const solarBar = document.createElement("div");
           solarBar.className = "bar-solar";
-          solarBar.style.height = Math.max(solar / maxVal * 100, 1) + "%";
+          const solarHeight = Math.max(solar / maxVal * 100, 1);
+          solarBar.style.height = solarHeight + "%";
+          solarBar.style.bottom = windHeight + "%";
 
           const consumptionLine = document.createElement("div");
-          consumptionLine.style.position = "absolute";
-          consumptionLine.style.top = (dailyConsumption * DAGEN[i] / maxVal * 100) + "%";
-          consumptionLine.style.width = "100%";
-          consumptionLine.style.height = "1px";
-          consumptionLine.style.background = "var(--muted)";
-          consumptionLine.style.borderTop = "1px dashed var(--muted)";
+          consumptionLine.className = "consumption-line";
+          consumptionLine.style.bottom = (dailyConsumption * DAGEN[i] / maxVal * 100) + "%";
 
           stack.append(windBar, solarBar, consumptionLine);
           
