@@ -110,7 +110,7 @@ input[type=range] { padding: 0; border: 0; accent-color: var(--wind-deep); backg
 .photo { display: block; width: 100%; height: 100%; object-fit: cover; }
 .card-art:has(.photo), .fr-art:has(.photo), .pm-art:has(.photo), .line-art:has(.photo) { padding: 0; overflow: hidden; display: block; }
 .pm-art:has(.photo) { align-self: start; aspect-ratio: 4 / 3; min-height: 0; }
-.hero-photo { object-position: 42% center; }
+.hero-photo { object-position: 50% center; }
 .live-card { position: absolute; left: 18px; bottom: 18px; background: color-mix(in srgb, var(--card) 88%, transparent); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; min-width: 230px; box-shadow: var(--shadow); }
 .live-head { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); display: flex; align-items: center; gap: 6px; }
 .pulse { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 1.6s infinite; }

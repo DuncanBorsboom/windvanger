@@ -3,7 +3,6 @@
 export const PRODUCTS = [
   {
     id: "havik-mini",
-    img: "img/havik-mini.jpg",
     name: "Havik Mini",
     tag: "Balkon & gevel",
     cats: ["gevel"],
@@ -17,7 +16,7 @@ export const PRODUCTS = [
   },
   {
     id: "bries",
-    img: "img/bries.jpg", imgPos: "68% 40%",
+    img: "img/bries-gevel.jpg",
     name: "Bries",
     tag: "Gevel · instapmodel",
     cats: ["gevel"],
@@ -46,7 +45,7 @@ export const PRODUCTS = [
   },
   {
     id: "stormvogel",
-    img: "img/stormvogel.jpg",
+    img: "img/stormvogel-tuin.jpg", imgPos: "66% 0%",
     name: "Stormvogel",
     tag: "Tuin · 4 m mast",
     cats: ["tuin"],
@@ -75,7 +74,6 @@ export const PRODUCTS = [
   },
   {
     id: "noorderstorm-set",
-    img: "img/noorderstorm.jpg",
     name: "Noorderstorm Set",
     tag: "Stormvogel + 5 kWh batterij",
     cats: ["tuin", "batterij"],
