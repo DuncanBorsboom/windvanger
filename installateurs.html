@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vind een Installateur — WINDVANGER | Verticale windturbines</title>
+  <meta name="description" content="Vind een gecertificeerde installateur bij jou in de buurt die Windvanger verticale windturbines kan installeren.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .installer-section { padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 4vw, 3rem); max-width: 1200px; margin: 0 auto; }
+    .search-box { max-width: 600px; margin: 0 auto 2rem; }
+    .search-input { width: 100%; display: flex; gap: .8rem; }
+    .search-input input { flex: 1; background: var(--ink-2); color: var(--text); border: 2px solid var(--line); border-radius: 12px; padding: .8rem 1.2rem; font: 600 1rem var(--font-head); transition: border-color .2s; }
+    .search-input input:focus { outline: none; border-color: var(--accent); }
+    .search-input button { background: var(--accent); color: var(--ink); border: none; border-radius: 12px; padding: 0 1.6rem; font: 700 1rem var(--font-head); cursor: pointer; white-space: nowrap; }
+    .search-input button:hover { opacity: .9; }
+    
+    .installer-results { margin-top: 2rem; }
+    .installer-grid { display: grid; gap: 1rem; }
+    .installer-card { background: var(--ink-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.4rem; display: grid; grid-template-columns: auto 1fr auto; gap: 1.2rem; align-items: start; }
+    .installer-logo { width: 60px; height: 60px; border-radius: 12px; background: var(--panel); display: flex; align-items: center; justify-content: center; font: 800 1.2rem var(--font-head); color: var(--accent); flex-shrink: 0; }
+    .installer-info h3 { font-size: 1rem; margin-bottom: .2rem; color: var(--text); }
+    .installer-info p { color: var(--muted); font-size: .85rem; margin: .1rem 0; }
+    .installer-info .distance { color: var(--accent); font-weight: 600; font-size: .85rem; }
+    .installer-actions { display: flex; flex-direction: column; gap: .4rem; justify-content: flex-start; }
+    .btn-installer { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: .4rem .8rem; font: 600 .75rem var(--font-head); text-decoration: none; display: inline-block; transition: all .2s; }
+    .btn-installer:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-installer.primary { background: var(--accent); color: var(--ink); border-color: var(--accent); }
+    .btn-installer.primary:hover { opacity: .9; }
+    
+    .no-results { text-align: center; padding: 3rem; color: var(--muted); }
+    .no-results h3 { color: var(--text); margin-bottom: .5rem; }
+    
+    .become-installer { background: linear-gradient(160deg, #fff6d8, var(--ink-2)); border: 1px solid var(--accent); border-radius: var(--radius); padding: 2rem; text-align: center; margin-top: 2rem; }
+    .become-installer h3 { color: var(--accent); margin-bottom: .5rem; }
+    .become-installer p { color: var(--text); margin-bottom: 1rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+    
+    .map-placeholder { background: linear-gradient(135deg, #e9eef6, #c9d5e6); border-radius: var(--radius); height: 300px; display: flex; align-items: center; justify-content: center; color: var(--muted); margin: 2rem 0; }
+    
+    @media (max-width: 768px) {
+      .installer-card { grid-template-columns: 1fr; gap: .8rem; }
+      .installer-actions { flex-direction: row; }
+      .search-input { flex-direction: column; }
+      .search-input button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a class="logo" href="index.html" aria-label="Windvanger home">
+      <svg viewBox="0 0 32 32" class="logo-mark" aria-hidden="true">
+        <path d="M16 3v26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        <path class="spin" d="M16 7 C 22 8, 24 13, 21 16 C 18 13, 16 11, 16 7 Z" fill="currentColor"/>
+        <path class="spin spin-2" d="M16 7 C 10 8, 8 13, 11 16 C 14 13, 16 11, 16 7 Z" fill="currentColor" opacity=".7"/>
+      </svg>
+      <span>WIND<span class="accent">VANGER</span></span>
+    </a>
+    <nav class="main-nav" aria-label="Hoofdmenu">
+      <a href="index.html#shop">Turbines</a>
+      <a href="calculator.html">Rekentool</a>
+      <a href="zakelijk.html">Zakelijk</a>
+      <a href="installateurs.html">Installateurs</a>
+      <a href="index.html#batterij">Thuisbatterij</a>
+      <a href="index.html#grid">Grid-onafhankelijk</a>
+      <a href="index.html#faq">Vragen</a>
+    </nav>
+    <a class="lang-btn" href="index-en.html" hreflang="en">EN</a>
+  </header>
+
+  <main id="top">
+    <section class="installer-section">
+      <div class="section-head">
+        <h2>Vind een Installateur</h2>
+        <p>Vind een gecertificeerde installateur of elektricien bij jou in de buurt die onze verticale windturbines kan installeren en koppelen aan je thuisbatterij.</p>
+      </div>
+
+      <div class="search-box">
+        <form id="installer-search" class="search-input">
+          <input type="text" id="search-postcode" placeholder="Voer je postcode in (bijv. 1234AB)" pattern="[0-9]{4}[A-Za-z]{2}" required>
+          <button type="submit">Zoeken</button>
+        </form>
+      </div>
+
+      <!-- Kaart placeholder -->
+      <div class="map-placeholder">
+        <p>Kaart met installateurs in jouw regio (demo)</p>
+      </div>
+
+      <div class="installer-results" id="installer-results">
+        <!-- Resultaten worden hier dynamisch ingeladen -->
+      </div>
+
+      <div class="become-installer">
+        <h3>Word installatiepartner</h3>
+        <p>Ben je elektricien, installateur of zonnepanelen-specialist en wil je Windvanger turbines aanbieden aan je klanten? Word partner en profiteer van onze training, ondersteuning en aantrekkelijke marges.</p>
+        <a href="zakelijk.html" class="btn btn-primary">Meer informatie</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p class="mono">WINDVANGER — Thuiswind sinds 2025 · KvK 0000000000 (demo)</p>
+    <p>Prototype webshop. Producten, prijzen en opbrengsten zijn indicatief.</p>
+  </footer>
+
+  <script>
+    (function() {
+      'use strict';
+
+      const searchForm = document.getElementById('installer-search');
+      const searchInput = document.getElementById('search-postcode');
+      const resultsContainer = document.getElementById('installer-results');
+
+      // Demo installateurs data (in een echte implementatie komt dit van een API)
+      const installers = [
+        { name: "GreenEnergy Solutions", postcode: "1011AA", city: "Amsterdam", distance: 5, phone: "020-1234567", website: "www.greenenergy.nl", email: "info@greenenergy.nl", certified: true, rating: 4.8 },
+        { name: "SolarWind Installaties", postcode: "1012AB", city: "Amsterdam", distance: 3, phone: "020-2345678", website: "www.solarwind.nl", email: "contact@solarwind.nl", certified: true, rating: 4.9 },
+        { name: "EcoPower BV", postcode: "3511AA", city: "Utrecht", distance: 45, phone: "030-1234567", website: "www.ecopower.nl", email: "info@ecopower.nl", certified: true, rating: 4.7 },
+        { name: "Duurzame Energie Partners", postcode: "3512AB", city: "Utrecht", distance: 42, phone: "030-2345678", website: "www.dep.nl", email: "info@dep.nl", certified: true, rating: 4.6 },
+        { name: "Wind & Zon BV", postcode: "2511AA", city: "Den Haag", distance: 50, phone: "070-1234567", website: "www.windenzon.nl", email: "info@windenzon.nl", certified: true, rating: 4.5 },
+        { name: "Groene Stroom Installaties", postcode: "2512AB", city: "Den Haag", distance: 55, phone: "070-2345678", website: "www.groenestroom.nl", email: "info@groenestroom.nl", certified: true, rating: 4.8 },
+        { name: "Energie Innovatie BV", postcode: "3011AA", city: "Rotterdam", distance: 60, phone: "010-1234567", website: "www.energie-innovatie.nl", email: "info@energie-innovatie.nl", certified: true, rating: 4.7 },
+        { name: "ZonneWind Combinatie", postcode: "3012AB", city: "Rotterdam", distance: 65, phone: "010-2345678", website: "www.zonnewind.nl", email: "info@zonnewind.nl", certified: true, rating: 4.9 },
+        { name: "Duurzaam Thuis", postcode: "5611AA", city: "Eindhoven", distance: 120, phone: "040-1234567", website: "www.duurzaamthuis.nl", email: "info@duurzaamthuis.nl", certified: true, rating: 4.6 },
+        { name: "Windvanger Specialist", postcode: "5612AB", city: "Eindhoven", distance: 125, phone: "040-2345678", website: "www.windvangerspecialist.nl", email: "info@windvangerspecialist.nl", certified: true, rating: 4.8 }
+      ];
+
+      // Zoekfunctie
+      function searchInstallers(postcode) {
+        if (!postcode) return [];
+
+        // Haal eerste 4 cijfers uit postcode
+        const postcodePrefix = postcode.toUpperCase().substring(0, 4);
+
+        // Filter installateurs (demo: toon alle, in productie: filter op regio)
+        return installers
+          .map(installer => {
+            // Bereken afstand (demo: willekeurig)
+            const distance = Math.floor(Math.random() * 30) + 1;
+            return { ...installer, distance };
+          })
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, 5);
+      }
+
+      function displayResults(installers) {
+        if (installers.length === 0) {
+          resultsContainer.innerHTML = `
+            <div class="no-results">
+              <h3>Geen installateurs gevonden</h3>
+              <p>Er zijn (nog) geen gecertificeerde installateurs in jouw regio. We breiden ons netwerk continu uit.</p>
+              <p>Ben je ge\u001fnteresseerd om installateur te worden? <a href="zakelijk.html">Neem contact op</a>.</p>
+            </div>
+          `;
+          return;
+        }
+
+        resultsContainer.innerHTML = `
+          <p class="mono" style="margin-bottom: 1rem;">Gevonden: ${installers.length} installateur(s) in jouw regio</p>
+          <div class="installer-grid">
+            ${installers.map(installer => `
+              <div class="installer-card">
+                <div class="installer-logo">${installer.name.substring(0, 2)}</div>
+                <div class="installer-info">
+                  <h3>${installer.name}</h3>
+                  <p>${installer.city} (${installer.postcode})</p>
+                  <p class="distance"> ${installer.distance} km</p>
+                  <p> Rating: ${'★'.repeat(Math.floor(installer.rating))}${'☆'.repeat(5 - Math.floor(installer.rating))} (${installer.rating})</p>
+                  ${installer.certified ? '<p><span style="color: var(--accent);">✓ Gecertificeerd</span></p>' : ''}
+                </div>
+                <div class="installer-actions">
+                  <a href="tel:${installer.phone}" class="btn-installer primary">Bellen</a>
+                  <a href="mailto:${installer.email}" class="btn-installer">E-mailen</a>
+                  <a href="${installer.website}" class="btn-installer" target="_blank" rel="noopener">Website</a>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      // Event listener
+      searchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const postcode = searchInput.value.trim();
+        
+        if (postcode.length < 6) {
+          resultsContainer.innerHTML = `
+            <div class="no-results">
+              <h3>Ongeldige postcode</h3>
+              <p>Voer een complete postcode in (bijv. 1234AB).</p>
+            </div>
+          `;
+          return;
+        }
+
+        const results = searchInstallers(postcode);
+        displayResults(results);
+      });
+
+      // Toon alle installateurs bij laden (demo)
+      displayResults(installers.slice(0, 5));
+    })();
+  </script>
+</body>
+</html>
