@@ -94,6 +94,20 @@ function turbineSVG(p, { mount = p.cats[0], speed = 1.4 } = {}) {
   return svg;
 }
 
+// Productfoto als die er is, anders de getekende turbine
+function productArt(p, opts) {
+  if (!p.img) return turbineSVG(p, opts);
+  const img = new Image();
+  img.src = p.img;
+  img.alt = "";
+  img.loading = "lazy";
+  img.decoding = "async";
+  img.className = "photo";
+  if (p.imgPos) img.style.objectPosition = p.imgPos;
+  img.addEventListener("error", () => img.replaceWith(turbineSVG(p, opts)), { once: true });
+  return img;
+}
+
 const io = new IntersectionObserver(entries => entries.forEach(e => { if (e.target._t) e.target._t.visible = e.isIntersecting; }));
 let lastFrame = performance.now();
 function animate(now) {
@@ -166,7 +180,7 @@ function renderCart() {
     row.className = "line";
     const art = document.createElement("div");
     art.className = "line-art";
-    if (item.watt) art.append(turbineSVG(item, { speed: 0.8 })); else art.textContent = item.id === "installatie" ? "🔧" : item.id === "batterij-module" ? "🔋" : "🛡️";
+    if (item.watt) art.append(productArt(item, { speed: 0.8 })); else art.textContent = item.id === "installatie" ? "🔧" : item.id === "batterij-module" ? "🔋" : "🛡️";
     row.append(art);
     row.insertAdjacentHTML("beforeend", `
       <div><h4>${item.name}</h4><span class="muted">${item.tag || item.note}</span>
@@ -227,7 +241,7 @@ function productCard(p) {
         <label class="compare-toggle"><input type="checkbox" data-compare ${compare.has(p.id) ? "checked" : ""}> Vergelijk</label>
       </div>
     </div>`;
-  $(".card-art", card).append(turbineSVG(p));
+  $(".card-art", card).append(productArt(p));
   card.addEventListener("click", e => {
     if (e.target.closest("[data-buy]")) addToCart(p.id);
     if (e.target.closest("[data-details], .card-art")) openProduct(p.id);
@@ -279,7 +293,7 @@ function openProduct(id) {
         <p><button class="link-btn" data-calc>Bereken opbrengst op mijn adres →</button></p>
       </div>
     </div>`;
-  $(".pm-art", m).append(turbineSVG(p, { speed: 1.8 }));
+  $(".pm-art", m).append(productArt(p, { speed: 1.8 }));
   m.onclick = e => {
     if (e.target === m || e.target.closest("[data-close]")) m.close();
     if (e.target.closest("[data-buy]")) { addToCart(p.id); m.close(); }
@@ -365,7 +379,7 @@ function showRecommendation({ home, goal, battery }) {
         <button type="button" class="link-btn" data-calc>Check opbrengst op mijn adres</button>
       </div>
     </div>`;
-  $(".fr-art", out).append(turbineSVG(p, { speed: 1.8 }));
+  $(".fr-art", out).append(productArt(p, { speed: 1.8 }));
   out.onclick = e => {
     if (e.target.closest("[data-buy]")) addToCart(p.id);
     if (e.target.closest("[data-calc]")) { selectCalcTurbine(p.id); location.hash = "#windcheck"; }
@@ -595,6 +609,15 @@ function initChrome() {
 /* ---------- Start ---------- */
 heroTurbine = turbineSVG(heroProduct, { mount: "tuin", speed: 2 });
 $("#hero-turbine").append(heroTurbine);
+{
+  const photo = $("#hero-photo");
+  const showPhoto = () => photo.closest(".hero-visual").classList.add("has-photo");
+  if (photo.complete && photo.naturalWidth) showPhoto();
+  else {
+    photo.addEventListener("load", showPhoto, { once: true });
+    photo.addEventListener("error", () => photo.remove(), { once: true });
+  }
+}
 initChrome();
 initCart();
 initProducts();
