@@ -354,7 +354,7 @@ function showRecommendation({ home, goal, battery }) {
     let s = 0;
     if (p.fit.home.includes(home)) s += 3; else s -= 5;
     if (p.fit.goal.includes(goal)) s += 2;
-    if (goal === "onafhankelijk" && battery === "nee" && p.battery) s += 2;
+    if (goal === "onafhankelijk" && battery === "nee" && p.battery && p.backup !== "geen") s += 2;
     if (battery === "ja" && p.battery) s -= 2;
     if (p.badge === "Bestseller") s += 0.5;
     if (home === "vrijstaand") s += p.watt / 1000; // meer ruimte = meer vermogen
@@ -365,7 +365,7 @@ function showRecommendation({ home, goal, battery }) {
     ? byId(goal === "onafhankelijk" ? "buffer-10" : "buffer-5") : null;
   const reasons = [
     home === "appartement" ? "Past op een balkon, geen vergunning nodig" : home === "rijtjeshuis" ? "Compact genoeg voor gevel of dak van een rijtjeshuis" : "Je hebt de ruimte voor meer vermogen",
-    battery === "ja" ? "Sluit direct aan op je bestaande thuisbatterij" : p.battery ? `Inclusief ${nl(p.battery)} kWh batterij met noodstroom` : pair ? `Met de ${pair.name}: ${nl(pair.kWh)} kWh opslag, ${BACKUP_LABEL[pair.backup]}` : "Later uit te breiden met een batterij",
+    battery === "ja" ? "Sluit direct aan op je bestaande thuisbatterij" : p.battery ? `Inclusief ${nl(p.battery)} kWh batterij, ${BACKUP_LABEL[p.backup]}` : pair ? `Met de ${pair.name}: ${nl(pair.kWh)} kWh opslag, ${BACKUP_LABEL[pair.backup]}` : "Later uit te breiden met een batterij",
     goal === "onafhankelijk" ? "Blijft opladen tijdens een stroomstoring" : `Slechts ${p.db} dB — stiller dan je koelkast`
   ];
   const out = $("#finder-result");
