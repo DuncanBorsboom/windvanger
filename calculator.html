@@ -460,7 +460,7 @@
         renderChart(solarKwp, turbineWatt, count, consumption, evAnnual);
 
         // Bereken scenario's
-        calculateScenarios(solarKwp, turbineWatt, count, consumption, evAnnual, battery, evData, price);
+        calculateScenarios(solarAnnual, turbineWatt, count, consumption, evAnnual, battery, evData, price);
       }
 
       function renderChart(solarKwp, turbineWatt, count, consumption, evAnnual) {
@@ -515,13 +515,17 @@
         });
       }
 
-      function calculateScenarios(solarKwp, turbineWatt, count, consumption, evAnnual, battery, evData, price) {
+      function calculateScenarios(solarAnnual, turbineWatt, count, consumption, evAnnual, battery, evData, price) {
         const totalWatt = turbineWatt * count;
+        const solarKwp = solarAnnual / (365 * 0.75); // Bereken kWp uit jaaropbrengst
         const dailyConsumption = (consumption + evAnnual) / 365;
 
         // Winterdag (gemiddelde van nov, dec, jan, feb)
-        const winterSolar = solarKwp * (ZONUREN[10] + ZONUREN[11] + ZONUREN[0] + ZONUREN[1]) / 4 * 0.75;
-        const winterWind = (totalWatt / 1000) * 24 * (WINDCF[10] + WINDCF[11] + WINDCF[0] + WINDCF[1]) / 4;
+        // Bereken winter zon als fractie van jaaropbrengst
+        const winterZonFraction = (ZONUREN[10] * DAGEN[10] + ZONUREN[11] * DAGEN[11] + ZONUREN[0] * DAGEN[0] + ZONUREN[1] * DAGEN[1]) / 
+                                   (ZONUREN.reduce((sum, h, i) => sum + h * DAGEN[i], 0));
+        const winterSolar = solarAnnual * winterZonFraction * 0.75;
+        const winterWind = (totalWatt / 1000) * 24 * (WINDCF[10] + WINDCF[11] + WINDCF[0] + WINDCF[1]) / 4 * 4; // 4 dagen gemiddeld
         const winterGeneration = winterSolar + winterWind;
         const winterCoverage = Math.round((winterGeneration / dailyConsumption) * 100);
 
@@ -529,8 +533,10 @@
         scenarioWinterCoverage.textContent = winterCoverage + "%";
 
         // Zomerdag (gemiddelde van mei, jun, jul, aug)
-        const summerSolar = solarKwp * (ZONUREN[4] + ZONUREN[5] + ZONUREN[6] + ZONUREN[7]) / 4 * 0.75;
-        const summerWind = (totalWatt / 1000) * 24 * (WINDCF[4] + WINDCF[5] + WINDCF[6] + WINDCF[7]) / 4;
+        const summerZonFraction = (ZONUREN[4] * DAGEN[4] + ZONUREN[5] * DAGEN[5] + ZONUREN[6] * DAGEN[6] + ZONUREN[7] * DAGEN[7]) / 
+                                   (ZONUREN.reduce((sum, h, i) => sum + h * DAGEN[i], 0));
+        const summerSolar = solarAnnual * summerZonFraction * 0.75;
+        const summerWind = (totalWatt / 1000) * 24 * (WINDCF[4] + WINDCF[5] + WINDCF[6] + WINDCF[7]) / 4 * 4;
         const summerGeneration = summerSolar + summerWind;
         const summerSurplus = Math.max(0, Math.round(summerGeneration - dailyConsumption));
 
@@ -549,7 +555,8 @@
         // EV laden
         const evDays = EV_CHARGE_DAYS[evChargeEl.value] || 0;
         const evAnnualKwh = (evData.daily || 0) * evDays;
-        const greenCharging = evAnnualKwh > 0 ? Math.round(Math.min(totalWind + solarKwp * 365 * 0.75 * 1.3, evAnnualKwh) / evAnnualKwh * 100) : 0;
+        const totalGeneration = solarAnnual + totalWind;
+        const greenCharging = evAnnualKwh > 0 ? Math.round(Math.min(totalGeneration, evAnnualKwh) / evAnnualKwh * 100) : 0;
         const evSavings = Math.round(greenCharging / 100 * evAnnualKwh * price);
 
         scenarioEvGreen.textContent = greenCharging + "%";
