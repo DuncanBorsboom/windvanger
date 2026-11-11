@@ -10,9 +10,9 @@ const WINTER = new Set([10, 11, 0, 1]);
 export const HOUSEHOLD_KWH = [0, 1730, 2690, 3240, 3740, 4100, 4450];
 // Elektrisch jaarverbruik warmtepomp per woningtype
 export const HEATPUMP_KWH = {
-  gas: { appartement: 0, rijtjeshuis: 0, vrijstaand: 0 },
-  hybride: { appartement: 700, rijtjeshuis: 1100, vrijstaand: 1500 },
-  wp: { appartement: 1800, rijtjeshuis: 2800, vrijstaand: 4000 }
+  gas: { appartement: 0, rijtjeshuis: 0, tweekapper: 0, vrijstaand: 0 },
+  hybride: { appartement: 700, rijtjeshuis: 1100, tweekapper: 1300, vrijstaand: 1500 },
+  wp: { appartement: 1800, rijtjeshuis: 2800, tweekapper: 3400, vrijstaand: 4000 }
 };
 export const EV_KWH_PER_KM = 0.18;
 const EV_CAP = 60;           // kWh accu
@@ -213,6 +213,7 @@ const MODULE = ADDONS.find(a => a.id === "batterij-module");
 const TURBINE_SETS = {
   appartement: [{ "havik-mini": 1 }, { "havik-mini": 2 }],
   rijtjeshuis: [{ "havik-mini": 1 }, { bries: 1 }, { bries: 2 }, { zephyr: 1 }, { zephyr: 1, bries: 1 }, { zephyr: 1, bries: 2 }],
+  tweekapper: [{ bries: 1 }, { bries: 2 }, { zephyr: 1 }, { zephyr: 2 }, { zephyr: 1, bries: 1 }, { zephyr: 1, bries: 2 }],
   vrijstaand: [{ bries: 1 }, { bries: 2 }, { zephyr: 1 }, { zephyr: 2 }, { stormvogel: 1 }, { stormvogel: 1, zephyr: 1 }, { stormvogel: 1, bries: 2 }, { stormvogel: 1, zephyr: 2 }]
 };
 
@@ -229,46 +230,64 @@ export function priceBundle(turbines, modules) {
   return { cart, price };
 }
 
-export function describe(turbines, modules) {
+export function describe(turbines, modules, extraPanels = 0) {
   const parts = Object.entries(turbines).filter(([, q]) => q).map(([id, q]) => `${q > 1 ? q + "× " : ""}${P(id).name}`);
   if (modules) parts.push(`${(modules * BAT_MODULE).toLocaleString("nl-NL")} kWh batterij`);
+  if (extraPanels) parts.push(`${extraPanels} zonnepanelen`);
   return parts.join(" + ");
 }
 
-export function candidates(home, budget) {
+// Zonnepanelen verkopen we niet zelf: die plaatst de installateur. Prijs is indicatief, incl. montage.
+export const PANEL_PRICE = 330;
+export const MAX_PANELS = { appartement: 0, rijtjeshuis: 14, tweekapper: 18, vrijstaand: 26 };
+const EXTRA_PANELS = [0, 4, 8, 12];
+
+export function candidates(home, budget, panels = 0) {
   const out = [];
   for (const turbines of TURBINE_SETS[home]) {
     for (let modules = 0; modules <= 4; modules++) {
-      const { cart, price } = priceBundle(turbines, modules);
-      if (price > budget) continue;
-      out.push({ turbines, modules, batKWh: modules * BAT_MODULE, cart, price, label: describe(turbines, modules) });
+      for (const extraPanels of EXTRA_PANELS) {
+        if (extraPanels && panels + extraPanels > MAX_PANELS[home]) continue;
+        const { cart, price: shopPrice } = priceBundle(turbines, modules);
+        const price = shopPrice + extraPanels * PANEL_PRICE;
+        if (price > budget) continue;
+        out.push({ turbines, modules, extraPanels, batKWh: modules * BAT_MODULE, cart, shopPrice, price, label: describe(turbines, modules, extraPanels) });
+      }
     }
   }
   return out;
 }
 
+const windCache = new WeakMap();
 export function windProfile(w, turbines) {
+  let byW = windCache.get(w);
+  if (!byW) windCache.set(w, (byW = new Map()));
+  const key = JSON.stringify(turbines);
+  if (byW.has(key)) return byW.get(key);
   const out = new Float32Array(w.n);
   for (const [id, q] of Object.entries(turbines)) {
     if (!q) continue;
     const prof = turbineProfile(w, P(id));
     for (let i = 0; i < w.n; i++) out[i] += prof[i] * q;
   }
+  byW.set(key, out);
   return out;
 }
 
 // Rekent alle pakketten door en kiest drie adviezen.
 export function plan(w, input) {
   const demand = buildDemand(w, input);
-  const sun = solarProfile(w, input.panels);
+  const sunCache = new Map();
+  const sunFor = n => { if (!sunCache.has(n)) sunCache.set(n, solarProfile(w, n)); return sunCache.get(n); };
+  const sun = sunFor(input.panels);
   const ev = { on: input.evOn, dailyKWh: (input.evKm * EV_KWH_PER_KM) / 365, pattern: input.evPattern, v2h: input.v2h };
   const cost = r => r.imp * input.price - r.exp * input.feedin;
 
   const base = simulate(w, demand, { wind: null, sun, batKWh: input.batExisting, ev });
   base.cost = cost(base);
 
-  const results = candidates(input.home, input.budget).map(c => {
-    const r = simulate(w, demand, { wind: windProfile(w, c.turbines), sun, batKWh: c.batKWh + input.batExisting, ev });
+  const results = candidates(input.home, input.budget, input.panels).map(c => {
+    const r = simulate(w, demand, { wind: windProfile(w, c.turbines), sun: sunFor(input.panels + c.extraPanels), batKWh: c.batKWh + input.batExisting, ev });
     const saving = base.cost - cost(r);
     return { ...c, r, saving, payback: saving > 0 ? c.price / saving : Infinity, net15: saving * 15 - c.price };
   });
@@ -282,9 +301,9 @@ export function plan(w, input) {
   take("rendement", "Snelst terugverdiend", "Laagste terugverdientijd", (a, b) => a.payback - b.payback || a.price - b.price);
   take("winter", "Meest onafhankelijk", "Hoogste dekking in de winter", (a, b) => b.r.winterSelf - a.r.winterSelf || a.price - b.price);
 
-  return { demand, sun, ev, base, results, picks };
+  return { demand, sun, sunFor, ev, base, results, picks };
 }
 
 export function detail(w, input, ctx, c) {
-  return simulate(w, ctx.demand, { wind: windProfile(w, c.turbines), sun: ctx.sun, batKWh: c.batKWh + input.batExisting, ev: ctx.ev, keep: true });
+  return simulate(w, ctx.demand, { wind: windProfile(w, c.turbines), sun: ctx.sunFor(input.panels + c.extraPanels), batKWh: c.batKWh + input.batExisting, ev: ctx.ev, keep: true });
 }

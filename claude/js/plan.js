@@ -1,5 +1,6 @@
 import { $, $$, eur, kwh, store, normalizePostcode, validPostcode, geocode } from "./shared.js";
-import { HOUSEHOLD_KWH, parseWeather, syntheticWeather, plan, detail } from "./energy.js";
+import { HOUSEHOLD_KWH, parseWeather, syntheticWeather, plan, detail, turbineProfile } from "./energy.js";
+import { PRODUCTS } from "./data.js";
 
 const MONTHS = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
 const pct = x => Math.round(x * 100) + "%";
@@ -103,7 +104,53 @@ async function locate(raw) {
     weather = syntheticWeather();
     status.textContent = "Weerdata niet bereikbaar. We rekenen met een voorbeeldjaar op basis van landelijke gemiddelden.";
   }
+  renderVs();
   recompute();
+}
+
+/* ---------- Stap 1: wind tegenover zon ---------- */
+function renderVs() {
+  const zephyr = PRODUCTS.find(p => p.id === "zephyr");
+  const windRaw = turbineProfile(weather, zephyr), kw = zephyr.watt / 1000;
+  const grid = () => Array.from({ length: 12 }, () => ({ sum: new Float64Array(24), n: new Uint16Array(24) }));
+  const gw = grid(), gs = grid();
+  let wTot = 0, sTot = 0, wNight = 0, sNight = 0, wWinter = 0, sWinter = 0, wDJ = 0, sDJ = 0;
+  for (let i = 0; i < weather.n; i++) {
+    const m = weather.month[i], h = weather.hour[i];
+    const wv = windRaw[i] / kw, sv = (weather.ghi[i] / 1000) * 0.88; // kWh per geïnstalleerde kW
+    gw[m].sum[h] += wv; gw[m].n[h]++; gs[m].sum[h] += sv; gs[m].n[h]++;
+    wTot += wv; sTot += sv;
+    if (h >= 18 || h < 8) { wNight += wv; sNight += sv; }
+    if ([10, 11, 0, 1].includes(m)) { wWinter += wv; sWinter += sv; }
+    if (m === 11 || m === 0) { wDJ += wv; sDJ += sv; }
+  }
+  heatmap($("#heat-wind"), gw, "var(--wind)", "kW per kW wind");
+  heatmap($("#heat-sun"), gs, "var(--sun)", "kW per kW zon");
+  const share = (a, b) => pct(b ? a / b : 0);
+  $("#vs-kpis").innerHTML = [
+    [`${share(wNight, wTot)} · ${share(sNight, sTot)}`, "van de stroom komt 's avonds en 's nachts (18–8 uur): wind · zon"],
+    [`${share(wWinter, wTot)} · ${share(sWinter, sTot)}`, "van de jaaropbrengst valt in nov–feb: wind · zon"],
+    [`${num(wDJ, 0)} · ${num(sDJ, 0)} kWh`, "per kW in december en januari: wind · zon"]
+  ].map(([b, t]) => `<div class="kpi"><b>${b}</b><span>${t}</span></div>`).join("");
+  const ratio = sDJ ? wDJ / sDJ : 0;
+  $("#vs-text").textContent = ratio >= 1
+    ? `Op jouw adres levert een kilowatt wind in december en januari ${num(ratio, 1)} keer zoveel als een kilowatt zon. Wind en zon vullen elkaar dus precies aan: zon in de zomer, wind in de winter en 's nachts.`
+    : `Op jouw adres levert zon per kilowatt ook in de winter meer op dan wind. Wind maakt hier vooral het verschil 's avonds en 's nachts, wanneer je panelen niets doen. Combineer wind daarom met een batterij.`;
+}
+
+function heatmap(el, g, color, unit) {
+  const avg = g.map(row => Array.from(row.sum, (v, h) => (row.n[h] ? v / row.n[h] : 0)));
+  const max = Math.max(...avg.flat(), 1e-6);
+  let html = `<div class="hm-corner"></div>` + [0, 6, 12, 18].map(h => `<div class="hm-hour" style="grid-column:${h + 2} / span 6">${String(h).padStart(2, "0")}u</div>`).join("");
+  avg.forEach((row, m) => {
+    html += `<div class="hm-month">${MONTHS[m]}</div>`;
+    row.forEach((v, h) => {
+      html += `<div class="hm-cell" style="background:color-mix(in srgb, ${color} ${Math.round((v / max) * 100)}%, var(--paper))" title="${MONTHS[m]} ${String(h).padStart(2, "0")}:00 — ${num(v, 2)} ${unit}"></div>`;
+    });
+  });
+  el.innerHTML = html;
+  el.setAttribute("role", "img");
+  el.setAttribute("aria-label", `${unit} per maand en uur, donkerder is meer`);
 }
 
 /* ---------- Rekenen & tonen ---------- */
@@ -162,9 +209,10 @@ function renderPackages() {
         <span><b>${pct(r.winterSelf)}</b> in de winter <small>nu ${pct(base.winterSelf)}</small></span>
         <span><b>${eur(c.saving)}</b> per jaar bespaard</span>
       </span>
-      <span class="pkg-price">${eur(c.price)} <small>${isFinite(c.payback) ? "terug in " + num(c.payback, c.payback < 10 ? 1 : 0) + " jaar" : "verdient zich niet terug"}</small></span>
+      <span class="pkg-price">${eur(c.price)} <small>${c.extraPanels ? `waarvan ${eur(c.shopPrice)} in de webshop · ` : ""}${isFinite(c.payback) ? "terug in " + num(c.payback, c.payback < 10 ? 1 : 0) + " jaar" : "verdient zich niet terug"}</small></span>
     </button>`;
   }).join("");
+  $("#panel-note").hidden = !ctx.picks.some(p => p.c.extraPanels);
 }
 
 function renderEmpty() {
@@ -174,6 +222,7 @@ function renderEmpty() {
   $("#day-chart").innerHTML = "";
   $("#day-text").textContent = "";
   $("#det-buy").hidden = true;
+  $("#det-installer").hidden = true;
 }
 
 let current = null;
@@ -185,7 +234,8 @@ function renderDetail(pick) {
   $("#det-eyebrow").textContent = pick.label;
   $("#det-title").textContent = c.label;
   $("#det-buy").hidden = false;
-  $("#det-buy").textContent = `Alles in winkelwagen · ${eur(c.price)}`;
+  $("#det-installer").hidden = false;
+  $("#det-buy").textContent = `In winkelwagen · ${eur(c.shopPrice)}`;
   const k = [
     [pct(r.self), `zelf opgewekt over het jaar (nu ${pct(base.self)})`, true],
     [pct(r.winterSelf), `in november t/m februari (nu ${pct(base.winterSelf)})`],
@@ -355,7 +405,16 @@ function init() {
     for (const [id, q] of Object.entries(current.c.cart)) cart[id] = (cart[id] || 0) + q;
     store.set("wv-cart", cart);
     cartCount();
-    toast(`${current.c.label} toegevoegd · <a href="index.html#winkelwagen">Bekijk winkelwagen</a>`);
+    toast(`Toegevoegd · <a href="index.html#winkelwagen">Winkelwagen</a> · <a href="installateurs.html">Kies een installateur</a>`);
+  });
+  // Het gekozen pakket gaat mee naar de offerteaanvraag bij de installateur
+  $("#det-installer").addEventListener("click", () => {
+    const c = current.c;
+    store.set("wv-plan-choice", {
+      label: c.label, price: c.price, shopPrice: c.shopPrice, extraPanels: c.extraPanels,
+      self: c.r.self, winterSelf: c.r.winterSelf, saving: Math.round(c.saving),
+      home: input.home, persons: +$("#persons").value, heat: input.heat, panels: input.panels, ev: input.evOn
+    });
   });
 
   cartCount();

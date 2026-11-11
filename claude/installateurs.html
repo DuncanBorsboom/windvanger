@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Installateur zoeken — Windvanger</title>
+  <meta name="description" content="Vind een gecertificeerde Windvanger-installateur bij jou in de buurt en vraag een offerte aan, met je rekenplan erbij.">
+  <meta name="theme-color" content="#0f1b24">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f1b24'/%3E%3Cpath d='M16 5v22M10 8c4 3 8 5 12 8M10 16c4 3 8 5 12 8' stroke='%2346d9c8' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
+  <script type="module" src="js/installers.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Naar inhoud</a>
+
+  <header class="site-header">
+    <a class="logo" href="index.html" aria-label="Windvanger, naar de winkel">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="currentColor"/><path d="M16 5v22M10 8c4 3 8 5 12 8M10 16c4 3 8 5 12 8" stroke="var(--wind)" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>
+      Windvanger
+    </a>
+    <nav class="nav" aria-label="Hoofdmenu">
+      <a href="index.html#turbines">Turbines</a>
+      <a href="plan.html">Rekentool</a>
+      <a href="installateurs.html" aria-current="page">Installateurs</a>
+      <a href="partners.html">Voor installateurs</a>
+    </nav>
+    <a class="cart-btn" href="index.html#winkelwagen">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12L6 6z"/><path d="M6 6L5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+      <span class="sr-only">Winkelwagen,</span>
+      <span class="cart-count" id="cart-count">0</span>
+    </a>
+  </header>
+
+  <main id="main" class="page">
+    <section class="page-intro">
+      <p class="eyebrow">Installatie · gecertificeerde partners</p>
+      <h1>Een installateur bij jou <em>om de hoek.</em></h1>
+      <p class="lead">Al onze partners zijn getraind op Windvanger-turbines en koppelen ze aan je zonnepanelen, thuisbatterij of laadpaal. Je aanvraag gaat direct naar de installateur, met je rekenplan erbij.</p>
+    </section>
+
+    <div class="plan-chip" id="plan-chip" hidden></div>
+
+    <form class="finder-bar" id="search">
+      <label class="field">
+        <span>Postcode</span>
+        <input id="pc" autocomplete="postal-code" placeholder="1234 AB" pattern="\s*[1-9][0-9]{3}\s?[A-Za-z]{2}\s*">
+      </label>
+      <label class="field">
+        <span>Afstand</span>
+        <select id="radius">
+          <option value="25">Tot 25 km</option>
+          <option value="50" selected>Tot 50 km</option>
+          <option value="100">Tot 100 km</option>
+          <option value="999">Heel Nederland</option>
+        </select>
+      </label>
+      <button class="btn btn-primary" type="submit">Zoeken</button>
+      <div class="skill-filter" role="group" aria-label="Doet ook">
+        <span class="sf-label">Doet ook:</span>
+        <label><input type="checkbox" value="zon"><span>Zonnepanelen</span></label>
+        <label><input type="checkbox" value="batterij"><span>Thuisbatterij</span></label>
+        <label><input type="checkbox" value="laadpaal"><span>Laadpaal</span></label>
+        <label><input type="checkbox" value="warmtepomp"><span>Warmtepomp</span></label>
+      </div>
+    </form>
+
+    <div class="finder-layout">
+      <div>
+        <div class="result-head">
+          <p id="result-count" aria-live="polite">–</p>
+          <button class="btn btn-dark" id="multi-quote" hidden>Vraag 3 offertes tegelijk aan</button>
+        </div>
+        <ol class="installer-list" id="list"></ol>
+      </div>
+      <div class="map-wrap"><div id="map" role="region" aria-label="Kaart met installateurs"></div></div>
+    </div>
+
+    <aside class="partner-banner">
+      <div>
+        <h2>Ben je zelf installateur?</h2>
+        <p>Klanten met een compleet rekenplan, rechtstreeks in je agenda. Lees hoe het partnerschap werkt en vraag de voorwaarden aan.</p>
+      </div>
+      <a class="btn btn-primary" href="partners.html">Word partner</a>
+    </aside>
+  </main>
+
+  <footer class="site-footer">
+    <div><strong>Windvanger</strong> — thuiswind sinds 2025<p>Prototype. De installateurs op deze pagina zijn voorbeeldbedrijven.</p></div>
+    <a href="index.html">← Terug naar de winkel</a>
+  </footer>
+
+  <dialog class="modal" id="quote" aria-labelledby="q-title">
+    <button class="icon-btn modal-close" data-close aria-label="Sluiten">✕</button>
+    <div id="q-body">
+      <h2 id="q-title">Offerte aanvragen</h2>
+      <p class="q-to" id="q-to"></p>
+      <form id="q-form" class="co-form">
+        <div class="two">
+          <label class="field"><span>Naam</span><input id="q-name" autocomplete="name" required></label>
+          <label class="field"><span>Telefoon <small>(optioneel)</small></span><input id="q-phone" type="tel" autocomplete="tel"></label>
+        </div>
+        <label class="field"><span>E-mail</span><input id="q-email" type="email" autocomplete="email" required></label>
+        <div class="two">
+          <label class="field"><span>Postcode</span><input id="q-pc" autocomplete="postal-code" required></label>
+          <label class="field"><span>Huisnummer</span><input id="q-nr" autocomplete="address-line2" inputmode="numeric" required></label>
+        </div>
+        <p class="addr" id="q-addr" aria-live="polite"></p>
+        <label class="field"><span>Wat wil je laten installeren?</span><textarea id="q-plan" rows="4"></textarea></label>
+        <label class="field"><span>Wanneer?</span>
+          <select id="q-when"><option>Zo snel mogelijk</option><option>Binnen 3 maanden</option><option>Ik oriënteer me nog</option></select>
+        </label>
+        <label class="switch"><input type="checkbox" id="q-ok" required><span>Ik ga akkoord dat mijn gegevens en rekenplan naar deze installateur(s) gaan.</span></label>
+        <button class="btn btn-primary btn-block" type="submit">Aanvraag versturen</button>
+        <p class="demo-note">Demo — er wordt niets verstuurd.</p>
+      </form>
+    </div>
+  </dialog>
+</body>
+</html>
