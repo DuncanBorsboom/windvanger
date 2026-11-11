@@ -1,6 +1,6 @@
 // Uur-voor-uur energiemodel: verbruik van het gezin (huishouden, warmtepomp, auto)
 // tegenover opwek (wind, zon) met een thuisbatterij en optioneel de auto als batterij.
-import { PRODUCTS, ADDONS } from "./data.js";
+import { PRODUCTS, BATTERIES, ADDONS } from "./data.js";
 import { curve, heightFactor } from "./shared.js";
 
 export const HOURS = 8760;
@@ -126,11 +126,11 @@ export function solarProfile(w, panels) {
 }
 
 /* ---------- Simulatie ---------- */
-// cfg: { wind: Float32Array|null, sun, batKWh, ev: {on, dailyKWh, pattern, v2h}, keep }
+// cfg: { wind: Float32Array|null, sun, batKWh, batKW (laad-/ontlaadvermogen), ev: {on, dailyKWh, pattern, v2h}, keep }
 export function simulate(w, demand, cfg) {
-  const { wind, sun, batKWh, ev, keep } = cfg;
+  const { wind, sun, batKWh, batKW, ev, keep } = cfg;
   const n = w.n;
-  const batCap = batKWh, batMin = batCap * 0.05, batMax = batCap * 0.95, batP = Math.max(2.5, batCap * 0.5);
+  const batCap = batKWh, batMin = batCap * 0.05, batMax = batCap * 0.95, batP = batKW || Math.max(2.5, batCap * 0.5);
   let batSoc = batCap * 0.5, evSoc = EV_CAP * 0.6;
   const evReserve = ev.on ? EV_CAP * 0.3 + ev.dailyKWh : 0;
   const T = { load: 0, demand: 0, evCharge: 0, wind: 0, sun: 0, direct: 0, bat: 0, v2h: 0, imp: 0, exp: 0, evRoad: 0,
@@ -207,8 +207,9 @@ export function simulate(w, demand, cfg) {
 }
 
 /* ---------- Pakketten ---------- */
-const P = id => PRODUCTS.find(p => p.id === id);
-const MODULE = ADDONS.find(a => a.id === "batterij-module");
+const ITEMS = [...PRODUCTS, ...BATTERIES, ...ADDONS];
+const item = id => ITEMS.find(p => p.id === id);
+const MODULE = "batterij-module";
 
 const TURBINE_SETS = {
   appartement: [{ "havik-mini": 1 }, { "havik-mini": 2 }],
@@ -217,22 +218,40 @@ const TURBINE_SETS = {
   vrijstaand: [{ bries: 1 }, { bries: 2 }, { zephyr: 1 }, { zephyr: 2 }, { stormvogel: 1 }, { stormvogel: 1, zephyr: 1 }, { stormvogel: 1, bries: 2 }, { stormvogel: 1, zephyr: 2 }]
 };
 
-// Bundel losse onderdelen tot sets waar dat goedkoper is, en geef de winkelwagenregels terug.
-export function priceBundle(turbines, modules) {
-  const t = { ...turbines };
-  let mod = modules;
-  const cart = {};
-  if ((t.bries || 0) >= 2 && mod >= 1) { cart["gezel-set"] = 1; t.bries -= 2; mod -= 1; }
-  if ((t.stormvogel || 0) >= 1 && mod >= 2) { cart["noorderstorm-set"] = 1; t.stormvogel -= 1; mod -= 2; }
-  for (const [id, q] of Object.entries(t)) if (q > 0) cart[id] = (cart[id] || 0) + q;
-  if (mod > 0) cart["batterij-module"] = mod;
-  const price = Object.entries(cart).reduce((s, [id, q]) => s + (P(id) || MODULE).price * q, 0);
-  return { cart, price };
+// Alle batterijkeuzes bij een set turbines: geen, een losse Buffer (eventueel uitgebreid),
+// of de batterij van een set als de turbines daar al in zitten.
+function batteryOptions(turbines) {
+  const opts = [{ turbines, items: {}, kWh: 0, kW: 0, backup: "geen" }];
+  for (const b of BATTERIES) {
+    for (const mods of [0, 2]) {
+      const kWh = b.kWh + mods * BAT_MODULE;
+      if (kWh > b.maxKWh) continue;
+      opts.push({ turbines, items: { [b.id]: 1, ...(mods ? { [MODULE]: mods } : {}) }, kWh, kW: b.kW, backup: b.backup });
+    }
+  }
+  const sets = [["gezel-set", "bries", 2, [0, 1, 2]], ["noorderstorm-set", "stormvogel", 1, [0, 2]]];
+  for (const [setId, turbine, uses, modList] of sets) {
+    if ((turbines[turbine] || 0) < uses) continue;
+    const set = item(setId), rest = { ...turbines, [turbine]: turbines[turbine] - uses };
+    for (const mods of modList) {
+      opts.push({ turbines: rest, items: { [setId]: 1, ...(mods ? { [MODULE]: mods } : {}) }, kWh: set.battery + mods * BAT_MODULE, kW: set.batKW, backup: set.backup });
+    }
+  }
+  return opts;
 }
 
-export function describe(turbines, modules, extraPanels = 0) {
-  const parts = Object.entries(turbines).filter(([, q]) => q).map(([id, q]) => `${q > 1 ? q + "× " : ""}${P(id).name}`);
-  if (modules) parts.push(`${(modules * BAT_MODULE).toLocaleString("nl-NL")} kWh batterij`);
+function cartOf(opt) {
+  const cart = {};
+  for (const [id, q] of Object.entries(opt.turbines)) if (q > 0) cart[id] = q;
+  return Object.assign(cart, opt.items);
+}
+
+export function describe(cart, extraPanels = 0) {
+  const parts = [];
+  for (const [id, q] of Object.entries(cart)) {
+    if (id === MODULE) parts.push(`${(q * BAT_MODULE).toLocaleString("nl-NL")} kWh extra`);
+    else parts.push(`${q > 1 ? q + "× " : ""}${item(id).name}`);
+  }
   if (extraPanels) parts.push(`${extraPanels} zonnepanelen`);
   return parts.join(" + ");
 }
@@ -240,18 +259,24 @@ export function describe(turbines, modules, extraPanels = 0) {
 // Zonnepanelen verkopen we niet zelf: die plaatst de installateur. Prijs is indicatief, incl. montage.
 export const PANEL_PRICE = 330;
 export const MAX_PANELS = { appartement: 0, rijtjeshuis: 14, tweekapper: 18, vrijstaand: 26 };
-const EXTRA_PANELS = [0, 4, 8, 12];
+const EXTRA_PANELS = [0, 6, 12];
 
-export function candidates(home, budget, panels = 0) {
+// choice: "auto" (alles), "geen", "set" of het id van een Buffer
+export function candidates(home, budget, panels = 0, { backup = false, choice = "auto" } = {}) {
   const out = [];
   for (const turbines of TURBINE_SETS[home]) {
-    for (let modules = 0; modules <= 4; modules++) {
+    for (const opt of batteryOptions(turbines)) {
+      if (backup && opt.backup === "geen") continue;
+      if (choice === "geen" && opt.kWh) continue;
+      if (choice === "set" && !opt.items["gezel-set"] && !opt.items["noorderstorm-set"]) continue;
+      if (choice.startsWith("buffer") && !opt.items[choice]) continue;
+      const cart = cartOf(opt);
+      const shopPrice = Object.entries(cart).reduce((s, [id, q]) => s + item(id).price * q, 0);
       for (const extraPanels of EXTRA_PANELS) {
         if (extraPanels && panels + extraPanels > MAX_PANELS[home]) continue;
-        const { cart, price: shopPrice } = priceBundle(turbines, modules);
         const price = shopPrice + extraPanels * PANEL_PRICE;
         if (price > budget) continue;
-        out.push({ turbines, modules, extraPanels, batKWh: modules * BAT_MODULE, cart, shopPrice, price, label: describe(turbines, modules, extraPanels) });
+        out.push({ turbines, allTurbines: turbines, cart, extraPanels, batKWh: opt.kWh, batKW: opt.kW, backup: opt.backup, shopPrice, price, label: describe(cart, extraPanels) });
       }
     }
   }
@@ -267,12 +292,16 @@ export function windProfile(w, turbines) {
   const out = new Float32Array(w.n);
   for (const [id, q] of Object.entries(turbines)) {
     if (!q) continue;
-    const prof = turbineProfile(w, P(id));
+    const prof = turbineProfile(w, item(id));
     for (let i = 0; i < w.n; i++) out[i] += prof[i] * q;
   }
   byW.set(key, out);
   return out;
 }
+
+// Een bestaande batterij telt mee: opslag erbij, vermogen naar gangbare maat (helft van de opslag, min. 2,5 kW).
+const existingKW = kWh => (kWh ? Math.max(2.5, kWh * 0.5) : 0);
+const batteryCfg = (c, input) => ({ batKWh: c.batKWh + input.batExisting, batKW: c.batKW + existingKW(input.batExisting) });
 
 // Rekent alle pakketten door en kiest drie adviezen.
 export function plan(w, input) {
@@ -283,11 +312,11 @@ export function plan(w, input) {
   const ev = { on: input.evOn, dailyKWh: (input.evKm * EV_KWH_PER_KM) / 365, pattern: input.evPattern, v2h: input.v2h };
   const cost = r => r.imp * input.price - r.exp * input.feedin;
 
-  const base = simulate(w, demand, { wind: null, sun, batKWh: input.batExisting, ev });
+  const base = simulate(w, demand, { wind: null, sun, batKWh: input.batExisting, batKW: existingKW(input.batExisting), ev });
   base.cost = cost(base);
 
-  const results = candidates(input.home, input.budget, input.panels).map(c => {
-    const r = simulate(w, demand, { wind: windProfile(w, c.turbines), sun: sunFor(input.panels + c.extraPanels), batKWh: c.batKWh + input.batExisting, ev });
+  const results = candidates(input.home, input.budget, input.panels, { backup: input.backup, choice: input.batChoice || "auto" }).map(c => {
+    const r = simulate(w, demand, { wind: windProfile(w, c.turbines), sun: sunFor(input.panels + c.extraPanels), ...batteryCfg(c, input), ev });
     const saving = base.cost - cost(r);
     return { ...c, r, saving, payback: saving > 0 ? c.price / saving : Infinity, net15: saving * 15 - c.price };
   });
@@ -305,5 +334,5 @@ export function plan(w, input) {
 }
 
 export function detail(w, input, ctx, c) {
-  return simulate(w, ctx.demand, { wind: windProfile(w, c.turbines), sun: ctx.sunFor(input.panels + c.extraPanels), batKWh: c.batKWh + input.batExisting, ev: ctx.ev, keep: true });
+  return simulate(w, ctx.demand, { wind: windProfile(w, c.turbines), sun: ctx.sunFor(input.panels + c.extraPanels), ...batteryCfg(c, input), ev: ctx.ev, keep: true });
 }

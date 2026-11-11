@@ -66,7 +66,7 @@ export const PRODUCTS = [
     price: 1590, oldPrice: 1790,
     badge: "Set",
     watt: 600, cutIn: 4, db: 38, mountHeight: 6,
-    blades: 3, twist: 1.2, battery: 2.5,
+    blades: 3, twist: 1.2, battery: 2.5, batKW: 2.5, backup: "groepen",
     desc: "De instap naar onafhankelijkheid: twee Bries-turbines met een compacte batterij die automatisch overneemt bij stroomuitval.",
     specs: { Piekvermogen: "2 × 300 W", Opslag: "2,5 kWh LiFePO4", Eilandmodus: "Ja, < 20 ms", Uitbreidbaar: "Tot 10 kWh", Montage: "2 gevelbeugels + wandunit" },
     inBox: ["2 × Bries-turbine", "2,5 kWh batterij met hybride omvormer", "Noodstroom-groep voor 4 aansluitingen"],
@@ -80,7 +80,7 @@ export const PRODUCTS = [
     price: 3790, oldPrice: 4280,
     badge: "Set",
     watt: 1500, cutIn: 3, db: 40, mountHeight: 6,
-    blades: 3, twist: 1.3, battery: 5,
+    blades: 3, twist: 1.3, battery: 5, batKW: 5, backup: "groepen",
     desc: "De complete winterkit. Stormvogel op mast plus 5 kWh thuisbatterij: licht, warmte en internet houden, ook als het net wegvalt.",
     specs: { Piekvermogen: "1,5 kW", Opslag: "5 kWh LiFePO4", Eilandmodus: "Ja, < 20 ms", Uitbreidbaar: "Tot 15 kWh", Montage: "Mast + binnenunit, plug & play" },
     inBox: ["Stormvogel + 4 m mast", "5 kWh batterij met hybride omvormer", "Noodstroom-groep voor 8 aansluitingen", "Installatie-check aan huis"],
@@ -88,10 +88,36 @@ export const PRODUCTS = [
   }
 ];
 
+// Thuisbatterijen. Los te koop en te combineren met elke turbine.
+export const BACKUP_LABEL = { geen: "geen noodstroom", groepen: "noodstroom voor 8 groepen", huis: "noodstroom voor het hele huis" };
+export const BATTERIES = [
+  {
+    id: "buffer-5", kind: "batterij", name: "Buffer 5", tag: "Thuisbatterij · instap", cats: ["thuisbatterij"],
+    price: 2190, kWh: 5, kW: 2.5, backup: "geen", maxKWh: 10,
+    desc: "Bewaart je wind- en zonnestroom voor de avond. Compact genoeg voor de meterkast of de schuur.",
+    specs: { Opslag: "5 kWh LiFePO4", Vermogen: "2,5 kW", Stroomuitval: "Geen noodstroom", Uitbreidbaar: "Tot 10 kWh", Garantie: "10 jaar" },
+    inBox: ["Batterij met hybride omvormer", "Wandbeugel", "Koppelkit voor Windvanger-turbines en zonnepanelen", "App voor laadstand en opbrengst"]
+  },
+  {
+    id: "buffer-10", kind: "batterij", name: "Buffer 10", tag: "Thuisbatterij · met noodstroom", cats: ["thuisbatterij"],
+    price: 3990, kWh: 10, kW: 5, backup: "groepen", maxKWh: 20,
+    desc: "Genoeg voor een winteravond met warmtepomp. Neemt binnen 20 ms over bij een stroomstoring: koelkast, cv, router en licht blijven aan.",
+    specs: { Opslag: "10 kWh LiFePO4", Vermogen: "5 kW", Stroomuitval: "8 groepen, < 20 ms", Uitbreidbaar: "Tot 20 kWh", Garantie: "10 jaar" },
+    inBox: ["Batterij met hybride omvormer", "Noodstroomkast voor 8 groepen", "Koppelkit voor Windvanger-turbines en zonnepanelen", "App voor laadstand en opbrengst"]
+  },
+  {
+    id: "buffer-15", kind: "batterij", name: "Buffer 15 Pro", tag: "Thuisbatterij · 3-fase", cats: ["thuisbatterij"],
+    price: 5590, kWh: 15, kW: 10, backup: "huis", maxKWh: 30,
+    desc: "Voor huizen met warmtepomp én elektrische auto. 3-fase en 10 kW, en bij een stroomstoring draait het hele huis gewoon door.",
+    specs: { Opslag: "15 kWh LiFePO4", Vermogen: "10 kW, 3-fase", Stroomuitval: "Hele huis, < 20 ms", Uitbreidbaar: "Tot 30 kWh", Garantie: "10 jaar" },
+    inBox: ["Batterij met 3-fase hybride omvormer", "Omschakelkast voor het hele huis", "Koppelkit voor Windvanger-turbines, zonnepanelen en laadpaal", "App voor laadstand en opbrengst"]
+  }
+];
+
 // Bijproducten voor upsell in de winkelwagen
 export const ADDONS = [
   { id: "installatie", name: "Installatie door gecertificeerde monteur", price: 249, note: "Binnen 3 weken, incl. aanmelding netbeheerder" },
-  { id: "batterij-module", name: "Batterijmodule 2,5 kWh (uitbreiding)", price: 890, note: "Klikt op elke Windvanger-batterij" },
+  { id: "batterij-module", name: "Batterijmodule 2,5 kWh (uitbreiding)", price: 890, note: "Klikt op elke Buffer en op de batterij in de sets" },
   { id: "garantie-plus", name: "Zorgeloos-pakket: 15 jaar garantie", price: 129, note: "Ook op omvormer en lagers" }
 ];
 
@@ -100,7 +126,8 @@ export const CATEGORIES = [
   { key: "gevel", label: "Gevel & balkon" },
   { key: "dak", label: "Dak" },
   { key: "tuin", label: "Tuin" },
-  { key: "batterij", label: "Met batterij" }
+  { key: "batterij", label: "Sets" },
+  { key: "thuisbatterij", label: "Batterijen" }
 ];
 
 export const MONTHS = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];

@@ -35,7 +35,9 @@ function readInput() {
     v2h: $("#v2h").checked,
     price: +$("#price").value,
     feedin: +$("#feedin").value,
-    budget: +$("#budget").value
+    budget: +$("#budget").value,
+    batChoice: $("#batchoice").value,
+    backup: $("#backup").checked
   };
 }
 
@@ -66,8 +68,8 @@ function restore() {
 function persist() {
   const f = $("#plan-form"), values = {};
   for (const name of ["home", "heat", "evpat"]) values[name] = f.elements[name].value;
-  for (const id of ["persons", "annual", "panels", "batex", "evkm", "price", "feedin", "budget"]) values[id] = $("#" + id).value;
-  for (const id of ["ev-on", "v2h"]) values[id] = $("#" + id).checked;
+  for (const id of ["persons", "annual", "panels", "batex", "evkm", "price", "feedin", "budget", "batchoice"]) values[id] = $("#" + id).value;
+  for (const id of ["ev-on", "v2h", "backup"]) values[id] = $("#" + id).checked;
   store.set("wv-plan", { values, annualManual });
 }
 
@@ -194,7 +196,7 @@ function renderNeed() {
 function renderPackages() {
   const el = $("#packages");
   if (!ctx.picks.length) {
-    el.innerHTML = `<p class="empty-note">Binnen dit budget past geen pakket voor dit woningtype. Verhoog het budget.</p>`;
+    el.innerHTML = `<p class="empty-note">Er past geen pakket bij deze keuzes. Verhoog het budget${input.batChoice !== "auto" ? ", laat de rekentool de batterij kiezen" : ""}${input.backup ? " of zet noodstroom uit" : ""}.</p>`;
     return;
   }
   const base = ctx.base;

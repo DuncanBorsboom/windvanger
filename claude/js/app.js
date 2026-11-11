@@ -1,7 +1,10 @@
-import { PRODUCTS, ADDONS, CATEGORIES, MONTHS, DAYS, FALLBACK_CLIMATE, SALDERING_END, REVIEWS } from "./data.js";
+import { PRODUCTS, BATTERIES, BACKUP_LABEL, ADDONS, CATEGORIES, MONTHS, DAYS, FALLBACK_CLIMATE, SALDERING_END, REVIEWS } from "./data.js";
 import { $, $$, eur, store, powerFraction, curve, heightFactor, normalizePostcode, validPostcode, geocode } from "./shared.js";
 
-const byId = id => PRODUCTS.find(p => p.id === id) || ADDONS.find(a => a.id === id);
+const CATALOG = [...PRODUCTS, ...BATTERIES];
+const byId = id => CATALOG.find(p => p.id === id) || ADDONS.find(a => a.id === id);
+const isBattery = p => p.kind === "batterij";
+const nl = n => n.toLocaleString("nl-NL");
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const refYield = p => Math.round((p.watt / 1000) * 8760 * powerFraction(5 * heightFactor(p.mountHeight), p.cutIn));
@@ -65,8 +68,27 @@ function turbineSVG(p, { mount = p.cats[0], speed = 1.4 } = {}) {
   return svg;
 }
 
-// Productfoto als die er is, anders de getekende turbine
+// Thuisbatterij als wandunit; hoogte en aantal cellen volgen de opslag
+function batterySVG(p) {
+  const svg = document.createElementNS(SVGNS, "svg");
+  svg.setAttribute("viewBox", "0 0 120 220");
+  svg.setAttribute("aria-hidden", "true");
+  const h = 70 + p.kWh * 6, y = 200 - h, cells = p.kWh / 2.5;
+  let bars = "";
+  for (let i = 0; i < cells; i++) bars += `<rect x="40" y="${y + h - 22 - i * 13}" width="40" height="9" rx="2" fill="var(--wind)" opacity="${0.55 + 0.45 * ((i + 1) / cells)}"/>`;
+  svg.innerHTML = `<rect x="0" y="0" width="120" height="220" fill="none"/>
+    <rect x="24" y="${y}" width="72" height="${h}" rx="10" fill="var(--card)" stroke="var(--ink-2)" stroke-width="3"/>
+    <rect x="34" y="${y + 12}" width="52" height="16" rx="4" fill="var(--ink)"/>
+    <path d="M62 ${y + 14}l-5 6h5l-3 6" stroke="var(--wind)" stroke-width="2" fill="none" stroke-linecap="round"/>
+    ${bars}
+    ${p.backup !== "geen" ? `<circle cx="86" cy="${y + 20}" r="3" fill="var(--sun)"/>` : ""}
+    <line x1="10" y1="206" x2="110" y2="206" stroke="var(--line)" stroke-width="4" stroke-linecap="round"/>`;
+  return svg;
+}
+
+// Productfoto als die er is, anders de getekende turbine of batterij
 function productArt(p, opts) {
+  if (isBattery(p)) return batterySVG(p);
   if (!p.img) return turbineSVG(p, opts);
   const img = new Image();
   img.src = p.img;
@@ -151,7 +173,7 @@ function renderCart() {
     row.className = "line";
     const art = document.createElement("div");
     art.className = "line-art";
-    if (item.watt) art.append(productArt(item, { speed: 0.8 })); else art.textContent = item.id === "installatie" ? "🔧" : item.id === "batterij-module" ? "🔋" : "🛡️";
+    if (item.watt || isBattery(item)) art.append(productArt(item, { speed: 0.8 })); else art.textContent = item.id === "installatie" ? "🔧" : item.id === "batterij-module" ? "🔋" : "🛡️";
     row.append(art);
     row.insertAdjacentHTML("beforeend", `
       <div><h4>${item.name}</h4><span class="muted">${item.tag || item.note}</span>
@@ -161,10 +183,12 @@ function renderCart() {
     body.append(row);
   }
 
-  // Upsell alleen als er een turbine in zit
+  // Upsell alleen als er een turbine in zit; een batterij als die nog ontbreekt
   const up = $("#cart-upsell");
   const hasTurbine = lines.some(l => l.item.watt);
-  const offers = ADDONS.filter(a => !cart[a.id]);
+  const hasBattery = lines.some(l => isBattery(l.item) || l.item.battery);
+  const batteryOffers = hasBattery ? [] : BATTERIES.filter(b => b.id !== "buffer-15").map(b => ({ ...b, note: `${nl(b.kWh)} kWh · ${nl(b.kW)} kW · ${BACKUP_LABEL[b.backup]}` }));
+  const offers = [...batteryOffers, ...ADDONS.filter(a => !cart[a.id] && (a.id !== "batterij-module" || hasBattery))];
   up.hidden = !hasTurbine || !offers.length;
   up.innerHTML = `<h3>Vaak samen gekocht</h3>` + offers.map(a =>
     `<div class="upsell"><div>${a.name}<small>${a.note}</small></div><button class="btn btn-ghost" data-add="${a.id}">+ ${eur(a.price)}</button></div>`).join("");
@@ -206,7 +230,9 @@ function productCard(p) {
       <h3>${p.name}</h3>
       <p>${p.desc}</p>
       <ul class="spec-pills">${pills}</ul>
-      <div class="yield">🌬️ ≈ <b>${refYield(p).toLocaleString("nl-NL")} kWh</b>/jaar bij 5 m/s · ${p.db} dB</div>
+      <div class="yield">${isBattery(p)
+        ? `<span>🔋 <b>${nl(p.kWh)} kWh</b> opslag · ${nl(p.kW)} kW · ${BACKUP_LABEL[p.backup]}</span>`
+        : `🌬️ ≈ <b>${nl(refYield(p))} kWh</b>/jaar bij 5 m/s · ${p.db} dB`}</div>
       <div class="price-row">${priceHTML(p)}<button class="btn btn-primary" data-buy>In winkelwagen</button></div>
       <div class="card-actions">
         <button class="link-btn" data-details>Details &amp; wat zit erin</button>
@@ -225,7 +251,7 @@ function productCard(p) {
 let activeCat = "all";
 function renderProducts() {
   const grid = $("#product-grid");
-  const list = PRODUCTS.filter(p => activeCat === "all" || p.cats.includes(activeCat));
+  const list = CATALOG.filter(p => activeCat === "all" || p.cats.includes(activeCat));
   grid.replaceChildren(...list.map(productCard));
 }
 
@@ -258,7 +284,7 @@ function openProduct(id) {
         <span class="card-tag">${p.tag}</span>
         <h2 id="pm-title">${p.name}</h2>
         <p>${p.desc}</p>
-        <dl>${specs}<dt>Opbrengst</dt><dd>≈ ${refYield(p).toLocaleString("nl-NL")} kWh/jaar bij 5 m/s</dd></dl>
+        <dl>${specs}${isBattery(p) ? "" : `<dt>Opbrengst</dt><dd>≈ ${nl(refYield(p))} kWh/jaar bij 5 m/s</dd>`}</dl>
         <strong>In de doos</strong>
         <ul>${p.inBox.map(i => `<li>${i}</li>`).join("")}</ul>
         <div class="price-row">${priceHTML(p)}<button class="btn btn-primary" data-buy>In winkelwagen</button></div>
@@ -288,12 +314,14 @@ function initCompare() {
     const items = [...compare].map(byId);
     const rows = [
       ["Prijs", p => eur(p.price)],
-      ["Piekvermogen", p => p.specs.Piekvermogen],
-      ["Geluid", p => p.db + " dB"],
-      ["Startwind", p => p.cutIn.toLocaleString("nl-NL") + " m/s"],
-      ["Opbrengst bij 5 m/s", p => "≈ " + refYield(p).toLocaleString("nl-NL") + " kWh/jaar"],
-      ["Thuisbatterij", p => p.battery ? p.battery.toLocaleString("nl-NL") + " kWh inbegrepen" : "Koppelkit inbegrepen"],
-      ["Montage", p => p.specs.Montage]
+      ["Piekvermogen turbine", p => p.specs.Piekvermogen || "—"],
+      ["Geluid", p => (p.db ? p.db + " dB" : "—")],
+      ["Startwind", p => (p.cutIn ? nl(p.cutIn) + " m/s" : "—")],
+      ["Opbrengst bij 5 m/s", p => (p.watt ? "≈ " + nl(refYield(p)) + " kWh/jaar" : "—")],
+      ["Opslag", p => (isBattery(p) ? nl(p.kWh) + " kWh" : p.battery ? nl(p.battery) + " kWh inbegrepen" : "Koppelkit voor je batterij")],
+      ["Vermogen batterij", p => (isBattery(p) ? nl(p.kW) + " kW" : p.batKW ? nl(p.batKW) + " kW" : "—")],
+      ["Bij stroomuitval", p => (p.backup ? BACKUP_LABEL[p.backup] : "—")],
+      ["Montage", p => p.specs.Montage || "Wand, binnen of in de schuur"]
     ];
     $("#compare-table").innerHTML = `<table class="cmp"><thead><tr><td></td>${items.map(p => `<th scope="col">${p.name}</th>`).join("")}</tr></thead>
       <tbody>${rows.map(([label, fn]) => `<tr><th scope="row">${label}</th>${items.map(p => `<td>${fn(p)}</td>`).join("")}</tr>`).join("")}
@@ -333,9 +361,11 @@ function showRecommendation({ home, goal, battery }) {
     return { p, s };
   }).sort((a, b) => b.s - a.s);
   const p = scored[0].p;
+  const pair = battery === "nee" && !p.battery && goal !== "klein"
+    ? byId(goal === "onafhankelijk" ? "buffer-10" : "buffer-5") : null;
   const reasons = [
     home === "appartement" ? "Past op een balkon, geen vergunning nodig" : home === "rijtjeshuis" ? "Compact genoeg voor gevel of dak van een rijtjeshuis" : "Je hebt de ruimte voor meer vermogen",
-    battery === "ja" ? "Sluit direct aan op je bestaande thuisbatterij" : p.battery ? `Inclusief ${p.battery.toLocaleString("nl-NL")} kWh batterij met noodstroom` : "Later uit te breiden met een batterij",
+    battery === "ja" ? "Sluit direct aan op je bestaande thuisbatterij" : p.battery ? `Inclusief ${nl(p.battery)} kWh batterij met noodstroom` : pair ? `Met de ${pair.name}: ${nl(pair.kWh)} kWh opslag, ${BACKUP_LABEL[pair.backup]}` : "Later uit te breiden met een batterij",
     goal === "onafhankelijk" ? "Blijft opladen tijdens een stroomstoring" : `Slechts ${p.db} dB — stiller dan je koelkast`
   ];
   const out = $("#finder-result");
@@ -343,17 +373,17 @@ function showRecommendation({ home, goal, battery }) {
   out.innerHTML = `<div class="fr-art"></div>
     <div>
       <p class="eyebrow">Ons advies voor jou</p>
-      <h3>${p.name}</h3>
-      <span class="card-tag">${p.tag}</span>
+      <h3>${p.name}${pair ? ` + ${pair.name}` : ""}</h3>
+      <span class="card-tag">${p.tag}${pair ? ` · ${pair.tag}` : ""}</span>
       <ul>${reasons.map(r => `<li>${r}</li>`).join("")}</ul>
       <div class="fr-actions">
-        <button type="button" class="btn btn-primary" data-buy>In winkelwagen · ${eur(p.price)}</button>
+        <button type="button" class="btn btn-primary" data-buy>${pair ? "Allebei in winkelwagen" : "In winkelwagen"} · ${eur(p.price + (pair ? pair.price : 0))}</button>
         <a class="link-btn" href="plan.html">Reken je hele gezin door →</a>
       </div>
     </div>`;
   $(".fr-art", out).append(productArt(p, { speed: 1.8 }));
   out.onclick = e => {
-    if (e.target.closest("[data-buy]")) addToCart(p.id);
+    if (e.target.closest("[data-buy]")) { addToCart(p.id); if (pair) addToCart(pair.id); }
     if (e.target.closest("[data-calc]")) { selectCalcTurbine(p.id); location.hash = "#windcheck"; }
   };
 }
@@ -547,7 +577,7 @@ function initReviews() {
 
 function initStructuredData() {
   const url = location.href.split("#")[0];
-  const products = PRODUCTS.map(p => ({
+  const products = CATALOG.map(p => ({
     "@type": "Product", name: `Windvanger ${p.name}`, description: p.desc, sku: p.id, brand: { "@type": "Brand", name: "Windvanger" },
     offers: { "@type": "Offer", price: p.price, priceCurrency: "EUR", availability: "https://schema.org/InStock", url: url + "#turbines" }
   }));
