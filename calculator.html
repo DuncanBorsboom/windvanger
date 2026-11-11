@@ -460,7 +460,7 @@
         renderChart(solarKwp, turbineWatt, count, consumption, evAnnual);
 
         // Bereken scenario's
-        calculateScenarios(solarAnnual, turbineWatt, count, consumption, evAnnual, battery, evData, price);
+        calculateScenarios(solarAnnual, totalWind, turbineWatt, count, consumption, evAnnual, battery, evData, evCharge, price);
       }
 
       function renderChart(solarKwp, turbineWatt, count, consumption, evAnnual) {
@@ -515,7 +515,7 @@
         });
       }
 
-      function calculateScenarios(solarAnnual, turbineWatt, count, consumption, evAnnual, battery, evData, price) {
+      function calculateScenarios(solarAnnual, totalWind, turbineWatt, count, consumption, evAnnual, battery, evData, evCharge, price) {
         const totalWatt = turbineWatt * count;
         const solarKwp = solarAnnual / (365 * 0.75); // Bereken kWp uit jaaropbrengst
         const dailyConsumption = (consumption + evAnnual) / 365;
@@ -553,7 +553,7 @@
         scenarioBatteryEv.textContent = evRange + " km";
 
         // EV laden
-        const evDays = EV_CHARGE_DAYS[evChargeEl.value] || 0;
+        const evDays = EV_CHARGE_DAYS[evCharge] || 0;
         const evAnnualKwh = (evData.daily || 0) * evDays;
         const totalGeneration = solarAnnual + totalWind;
         const greenCharging = evAnnualKwh > 0 ? Math.round(Math.min(totalGeneration, evAnnualKwh) / evAnnualKwh * 100) : 0;
